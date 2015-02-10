@@ -3,9 +3,6 @@
 from hardware_control import HardwareController
 import serial
 
-COMMAND_SIZE = 4        # Size of serial command in bytes
-DATA_SIZE = 12          # Size of data in bytes
-
 
 class ArduinoSerialController(HardwareController):
     """ This class is an abstraction layer to allow communication
@@ -13,7 +10,7 @@ class ArduinoSerialController(HardwareController):
         and receive data from the microcontroller.
     """
 
-    def __init__(self, communicationChannel='/dev/tty.usbserial',
+    def __init__(self, serialPort='/dev/ttyS0',
                  baudrate=115200,
                  stopbits=serial.STOPBITS_ONE,
                  bytesize=serial.EIGHTBITS):
@@ -21,41 +18,27 @@ class ArduinoSerialController(HardwareController):
             It requires the ID of the communication channel to the
             microcontroller.
         """
-        try:
-            self.channel = serial.Serial(communicationChannel, baudrate)
-        except Exception as e:
-            self.channel = None
-            print ("Error: Could not establish serial connection "
-                   "to %s.\n%s" % (communicationChannel, e))
+        self.channel = serial.Serial(serialPort, baudrate)
 
-    def sendCommand(self, command, data=''):
-        """ This function will send a command to the specified module.
-            The command and data size will be predetermined and combined
-            into a single string. This string will be sent to the arduino
-            for parsing.
+    def __del__(self):
+        """ Close the serial connection when the class is deleted """
+        self.channel.close()
 
-            A command can be less than COMMAND_SIZE and will
-            add trailing whitespaces to meet the required COMMAND_SIZE.
-
-            The data is not mandatory. If no data is provided it will
-            be padded with whitespaces to meet the required DATA_SIZE.
+    def __send(self, data):
+        """ This function sends data onto the serial connection
+            towards the arduino. It's used by the generic
+            HardwareController class to send commands towards
+            the Arduino.
         """
+        self.channel.write(data)
 
-        if len(command) > COMMAND_SIZE:
-            print ("Error: command %s is invalid. Size should be %d"
-                   "or smaller" % (command, COMMAND_SIZE))
-        if len(data) > DATA_SIZE:
-            print ("Error: data %s is invalid. Size should be %d"
-                   "or smaller" % (data, DATA_SIZE))
-
-        serialCommand = ''.join([command.ljust(COMMAND_SIZE, ' '),
-                                data.ljust(DATA_SIZE, ' ')])
-        # self.channel.write(serialCommand)
-        print serialCommand
-
-    def recvCommand(self, module):
-        """ This function will retrieve data from the specified module """
-        return
+    def __recv(self):
+        """ This function receives data from the Arduino through
+            the serial connection. It's used by the generic
+            HardwareController class to send commands towards the
+            Arduino.
+        """
+        return self.channel.read(self.commandSize+self.dataSize)
 
 
 def main():
@@ -63,10 +46,15 @@ def main():
         Only to be used to do quick tests on the library.
     """
 
-    arduinoControl = ArduinoSerialController()
-    arduinoControl.sendCommand('FWD', '255')
-    arduinoControl.sendCommand('STOP')
-    arduinoControl.sendCommand('FAULTY COMMAND')
+    try:
+        hwControl = ArduinoSerialController()
+    except Exception as e:
+        print ("Error, could not establish connection to "
+               "Arduino through the serial port.\n%s") % e
+        exit()
+    hwControl.sendCommand('FWD', '255')
+    hwControl.sendCommand('STOP')
+    hwControl.sendCommand('FAULTY COMMAND')
 
 
 if __name__ == '__main__':
