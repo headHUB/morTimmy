@@ -9,4 +9,7 @@ setup(name='morTimmy',
       author_email='mathijs@mortimer.nl',
       url='https://github.com/thiezn/morTimmy',
       packages=['morTimmy'],
+      install_requires=[
+          'pyserial>=2.7'
+          ]
       )
