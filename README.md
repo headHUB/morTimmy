@@ -37,4 +37,16 @@ What have I done so far:
   can be found in the relevant docs/ directories as well as on my personal
   homepage http://morTimmy.mortimer.nl/
 - Received the hardware order I've placed with http://www.hobbycomponents.com/
+
   ![Screenshot of hardware ordered from hobbycomponents.com](http://raw.github.com/thiezn/morTimmy/master/images/hw_order.jpg)
+
+
+## Credits
+
+- First have to credit my wife for putting up with me and my time consuming hobbies!
+
+- Next I have to really give credit to Miguel Grindberg. He has created a really excellent tutorial on 
+  building an Arduino Robot. I especially like his detailed explanation and he uses a proper Object Oriented 
+  structure in his project which allows you to easily expand upon the code. Check it out here: 
+
+  http://blog.miguelgrinberg.com/post/building-an-arduino-robot-part-i-hardware-components
