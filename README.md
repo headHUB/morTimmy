@@ -24,3 +24,17 @@ I've purchased the following initial hardware from the british site http://www.h
 - 1x 4 Wheeled Robot Smart Car Chassis Kit DC 3v 5v 6v suitable for Arduino
 - 1x 20cm Solderless Female to Female DuPont Jumper Breadboard Wires (40-Cable Pack)
 
+## Project progress
+
+This section outlines the current status of my project. 
+
+What have I done so far:
+- Setup (this) github repository, first time working with git so bear with me!
+- Created skeleton classes for both Arduino (C++) and the Raspberry Pi (Python)
+- Starting to use Docstrings to properly document my code. Trying to follow the
+  Google Style Python Docstrings guidelines. Also implemented sphinx on my 
+  home server to generate documentation from the Docstrings. The documentation
+  can be found in the relevant docs/ directories as well as on my personal
+  homepage http://morTimmy.mortimer.nl/
+- Received the hardware order I've placed with http://www.hobbycomponents.com/
+  ![Screenshot of hardware ordered from hobbycomponents.com](http://raw.github.com/thiezn/morTimmy/master/images/hw_order.jpg)
