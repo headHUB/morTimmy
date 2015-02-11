@@ -2,7 +2,8 @@
 
 
 class MotorDriver():
-    """ This class is a generic driver for DC Motors.
+    """ Generic driver for DC Motors.
+
     It will contain the basic skeleton for working with DC motors.
 
     Specific child classes will be created based on this class
@@ -10,11 +11,12 @@ class MotorDriver():
     """
 
     def setSpeed(self, speed):
-        """ This function will be used to set the speed of the motor
-        valid values are between -255 and 255.
-        Negative numbers will be used to put the motor in reverse
-        whilst positive numbers will drive the motor forward. zero
-        will stop the motor.
+        """ Used to set the speed and direction of the motor
+
+        Args:
+          speed (int): Sets the speed of the motor. Negative numbers
+          put the motor in reverse, zero will stop the motor. valid
+          values are between -255 and 255.
         """
 
         pass

@@ -1,6 +1,6 @@
 # Ignore python .pyc library files
 *.pyc
-
+*.swp
 
 # Ignore sphinx docstring config and makefile and my bash script for generating the docs
 generateDocs.sh         

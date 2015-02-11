@@ -4,12 +4,12 @@ from motor_driver import MotorDriver
 
 
 class Motor(MotorDriver):
-    """ This class is a child of the generic driver for DC Motors.
-    It will contain the class for working together with the
-    DC Motors connected to the arduino through the H-Bridge modules.
+    """ Child class of the generic driver for DC Motors.
 
-    The H-Bridge module allows you to control motors in both
-    directions.
+    Contains the class for working together with the
+    DC Motors connected to the arduino through the H-Bridge
+    modules. The H-Bridge module allows you to control motors
+    in both directions.
 
     Interface will be handled through a serial
     connection between the raspberry pi and the arduino.
@@ -23,7 +23,7 @@ class Motor(MotorDriver):
         self.currentSpeed = 0
 
     def setSpeed(self, speed):
-        """ This function will be used to set the speed of the motor
+        """ Used to set the speed and direction of the motor
 
         Args:
           speed (int): sets the speed of the motor. Valid values are

@@ -2,16 +2,17 @@
 
 
 class HardwareController():
-    """ This class is an abstraction layer to allow communication
-    to the low level hardware layer. It will be able to send
-    and receive data from the microcontroller.
+    """ High level interface towards the hardware layer
+
+    It will be able to send and receive data from the microcontroller.
     """
 
     __commandSize = 4      # Size of the recv and send command in Bytes
     __dataSize = 12        # Size of the recv and send data in Bytes
 
     def sendCommand(self, command, data=''):
-        """ This function will send a command to the specified module.
+        """ Send a command to the hardware controller.
+
         The command and data size will be predetermined and combined
         into a single string. This string will be sent to the arduino
         for parsing.
@@ -37,8 +38,7 @@ class HardwareController():
         self.__send(sendString)
 
     def getCommand(self):
-        """ This function will retrieve data from the
-        specified module
+        """ Retrieve data from the hardware controller
 
         Returns:
           self.__recv (str): Returns a command received from the hardware
