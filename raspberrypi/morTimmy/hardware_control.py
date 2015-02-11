@@ -7,8 +7,8 @@ class HardwareController():
         and receive data from the microcontroller.
     """
 
-    commandSize = 4      # Size of the recv and send command in Bytes
-    dataSize = 12        # Size of the recv and send data in Bytes
+    __commandSize = 4      # Size of the recv and send command in Bytes
+    __dataSize = 12        # Size of the recv and send data in Bytes
 
     def sendCommand(self, command, data=''):
         """ This function will send a command to the specified module.
@@ -23,20 +23,20 @@ class HardwareController():
             be padded with whitespaces to meet the required dataSize.
         """
 
-        if len(command) > self.commandSize:
+        if len(command) > self.__commandSize:
             print ("Error: command %s is invalid. Size should be %d "
-                   "or smaller" % (command, self.commandSize))
+                   "or smaller" % (command, self.__commandSize))
             return
-        if len(data) > self.dataSize:
+        if len(data) > self.__dataSize:
             print ("Error: data %s is invalid. Size should be %d "
-                   "or smaller" % (data, self.dataSize))
+                   "or smaller" % (data, self.__dataSize))
             return
 
-        sendString = ''.join([command.ljust(self.commandSize, ' '),
-                              data.ljust(self.dataSize, ' ')])
+        sendString = ''.join([command.ljust(self.__commandSize, ' '),
+                              data.ljust(self.__dataSize, ' ')])
         self.__send(sendString)
 
-    def getCommand(self, module):
+    def getCommand(self):
         """ This function will retrieve data from the specified module """
         return self.__recv()
 

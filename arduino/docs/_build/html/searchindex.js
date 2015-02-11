@@ -1,0 +1,1 @@
+Search.setIndex({objects:{},terms:{index:1,search:1,welcom:1,mortimmy_arduino:1,titl:[],modul:1,someth:0,indic:1,content:1,aver:0,second:0,let:0,here:0,tabl:1,rst:[],document:1,page:[0,1],mortimmi:[1,2],introduct:[0,1]},objtypes:{},titles:["Introduction","Welcome to morTimmy_arduino&#8217;s documentation!","morTimmy"],objnames:{},filenames:["introduction","index","modules"]})

@@ -1,1 +1,8 @@
+# Ignore python .pyc library files
 *.pyc
+
+# Ignore sphinx docstring config and makefile
+raspberrypi/docs/conf.py
+raspberrypi/docs/Makefile
+arduino/docs/conf.py
+arduino/docs/Makefile

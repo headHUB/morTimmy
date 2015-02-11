@@ -7,17 +7,15 @@ import serial
 class ArduinoSerialController(HardwareController):
     """ This class is an abstraction layer to allow communication
         to the low level hardware layer. It will be able to send
-        and receive data from the microcontroller.
+        and receive data from the Arduino microcontroller using
+        a serial interface.
     """
 
     def __init__(self, serialPort='/dev/ttyS0',
                  baudrate=115200,
                  stopbits=serial.STOPBITS_ONE,
                  bytesize=serial.EIGHTBITS):
-        """ The initialisation for the ArduinoSerialController class
-            It requires the ID of the communication channel to the
-            microcontroller.
-        """
+        """ The initialisation for the ArduinoSerialController class """
         self.channel = serial.Serial(serialPort, baudrate)
 
     def __del__(self):
@@ -25,7 +23,7 @@ class ArduinoSerialController(HardwareController):
         self.channel.close()
 
     def __send(self, data):
-        """ This function sends data onto the serial connection
+        """ This function sends data onto the serial port
             towards the arduino. It's used by the generic
             HardwareController class to send commands towards
             the Arduino.
@@ -34,7 +32,7 @@ class ArduinoSerialController(HardwareController):
 
     def __recv(self):
         """ This function receives data from the Arduino through
-            the serial connection. It's used by the generic
+            the serial port. It's used by the generic
             HardwareController class to send commands towards the
             Arduino.
         """
@@ -54,7 +52,7 @@ def main():
         exit()
     hwControl.sendCommand('FWD', '255')
     hwControl.sendCommand('STOP')
-    hwControl.sendCommand('FAULTY COMMAND')
+    hwControl.sendCommand('COMMAND TO LONG!')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>morTimmy Package &mdash; morTimmy_raspberrypi 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="morTimmy_raspberrypi 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">morTimmy_raspberrypi 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mortimmy-package">
+<h1>morTimmy Package<a class="headerlink" href="#mortimmy-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-morTimmy.arduino_motor_driver">
+<span id="arduino-motor-driver-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">arduino_motor_driver</span></tt> Module<a class="headerlink" href="#module-morTimmy.arduino_motor_driver" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="morTimmy.arduino_motor_driver.Motor">
+<em class="property">class </em><tt class="descclassname">morTimmy.arduino_motor_driver.</tt><tt class="descname">Motor</tt><big>(</big><em>motorID</em><big>)</big><a class="headerlink" href="#morTimmy.arduino_motor_driver.Motor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#morTimmy.motor_driver.MotorDriver" title="morTimmy.motor_driver.MotorDriver"><tt class="xref py py-class docutils literal"><span class="pre">morTimmy.motor_driver.MotorDriver</span></tt></a></p>
+<p>This class is a child of the generic driver for DC Motors.
+It will contain the class for working together with the
+DC Motors connected to the arduino through the H-Bridge modules.
+The H-Bridge module allows you to control motors in both
+directions. Interface will be handled through a serial
+connection between the raspberry pi and the arduino.
+(TODO, write arduino serial remote control library)</p>
+<dl class="method">
+<dt id="morTimmy.arduino_motor_driver.Motor.getSpeed">
+<tt class="descname">getSpeed</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.arduino_motor_driver.Motor.getSpeed" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will return the current speed of the motor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="morTimmy.arduino_motor_driver.Motor.setSpeed">
+<tt class="descname">setSpeed</tt><big>(</big><em>speed</em><big>)</big><a class="headerlink" href="#morTimmy.arduino_motor_driver.Motor.setSpeed" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will be used to set the speed of the motor
+valid values are between -255 and 255.
+Negative numbers will be used to put the motor in reverse
+whilst positive numbers will drive the motor forward.
+Zero will stop the motor</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="morTimmy.arduino_motor_driver.main">
+<tt class="descclassname">morTimmy.arduino_motor_driver.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.arduino_motor_driver.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will only be called when the library is run 
+directly Only to be used to do quick tests on the library</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-morTimmy.arduino_serial_hardware_control">
+<span id="arduino-serial-hardware-control-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">arduino_serial_hardware_control</span></tt> Module<a class="headerlink" href="#module-morTimmy.arduino_serial_hardware_control" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="morTimmy.arduino_serial_hardware_control.ArduinoSerialController">
+<em class="property">class </em><tt class="descclassname">morTimmy.arduino_serial_hardware_control.</tt><tt class="descname">ArduinoSerialController</tt><big>(</big><em>serialPort='/dev/ttyS0'</em>, <em>baudrate=115200</em>, <em>stopbits=1</em>, <em>bytesize=8</em><big>)</big><a class="headerlink" href="#morTimmy.arduino_serial_hardware_control.ArduinoSerialController" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#morTimmy.hardware_control.HardwareController" title="morTimmy.hardware_control.HardwareController"><tt class="xref py py-class docutils literal"><span class="pre">morTimmy.hardware_control.HardwareController</span></tt></a></p>
+<p>This class is an abstraction layer to allow communication
+to the low level hardware layer. It will be able to send
+and receive data from the Arduino microcontroller using
+a serial interface.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="morTimmy.arduino_serial_hardware_control.main">
+<tt class="descclassname">morTimmy.arduino_serial_hardware_control.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.arduino_serial_hardware_control.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will only be called when the library is run directly
+Only to be used to do quick tests on the library.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-morTimmy.hardware_control">
+<span id="hardware-control-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">hardware_control</span></tt> Module<a class="headerlink" href="#module-morTimmy.hardware_control" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="morTimmy.hardware_control.HardwareController">
+<em class="property">class </em><tt class="descclassname">morTimmy.hardware_control.</tt><tt class="descname">HardwareController</tt><a class="headerlink" href="#morTimmy.hardware_control.HardwareController" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is an abstraction layer to allow communication
+to the low level hardware layer. It will be able to send
+and receive data from the microcontroller.</p>
+<dl class="method">
+<dt id="morTimmy.hardware_control.HardwareController.getCommand">
+<tt class="descname">getCommand</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.hardware_control.HardwareController.getCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will retrieve data from the specified module</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="morTimmy.hardware_control.HardwareController.sendCommand">
+<tt class="descname">sendCommand</tt><big>(</big><em>command</em>, <em>data=''</em><big>)</big><a class="headerlink" href="#morTimmy.hardware_control.HardwareController.sendCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will send a command to the specified module.
+The command and data size will be predetermined and combined
+into a single string. This string will be sent to the arduino
+for parsing.</p>
+<p>A command can be less than commandSize and will
+add trailing whitespaces to meet the required commandSize.</p>
+<p>The data is not mandatory. If no data is provided it will
+be padded with whitespaces to meet the required dataSize.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="morTimmy.hardware_control.main">
+<tt class="descclassname">morTimmy.hardware_control.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.hardware_control.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will only be called when the library is run directly
+Only to be used to do quick tests on the library.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-morTimmy.morTimmy">
+<span id="mortimmy-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">morTimmy</span></tt> Module<a class="headerlink" href="#module-morTimmy.morTimmy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="morTimmy.morTimmy.Robot">
+<em class="property">class </em><tt class="descclassname">morTimmy.morTimmy.</tt><tt class="descname">Robot</tt><big>(</big><em>frontLeftMotorID</em>, <em>frontRightMotorID</em>, <em>rearLeftMotorID</em>, <em>rearRightMotorID</em><big>)</big><a class="headerlink" href="#morTimmy.morTimmy.Robot" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class will hold the logic for our robot morTimmy.
+The brain of the robot is a raspberry Pi and the low level
+electronic are handled by an Arduino. The Arduino provides
+an interface to the DC motors and various sensors</p>
+<dl class="method">
+<dt id="morTimmy.morTimmy.Robot.initialize">
+<tt class="descname">initialize</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.morTimmy.Robot.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will (re)initialize the robot. We have
+this in a seperate function (opposed to __init__) so we
+can easily reinitialise the robot within our class</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="morTimmy.morTimmy.Robot.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.morTimmy.Robot.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function contains the main robot loop
+as an initial test we&#8217;re going to get the
+robot to spin constantly</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="morTimmy.morTimmy.main">
+<tt class="descclassname">morTimmy.morTimmy.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.morTimmy.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main function of our script.
+It will only contain a very limited program
+logic. The main action happens in the Robot class</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-morTimmy.motor_driver">
+<span id="motor-driver-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">motor_driver</span></tt> Module<a class="headerlink" href="#module-morTimmy.motor_driver" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="morTimmy.motor_driver.MotorDriver">
+<em class="property">class </em><tt class="descclassname">morTimmy.motor_driver.</tt><tt class="descname">MotorDriver</tt><a class="headerlink" href="#morTimmy.motor_driver.MotorDriver" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is a generic driver for DC Motors.
+It will contain the basic skeleton for working with DC motors.
+Specific child classes will be created based on this class
+for different types of motors in the project.</p>
+<dl class="method">
+<dt id="morTimmy.motor_driver.MotorDriver.getSpeed">
+<tt class="descname">getSpeed</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.motor_driver.MotorDriver.getSpeed" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will return the current speed of the motor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="morTimmy.motor_driver.MotorDriver.setSpeed">
+<tt class="descname">setSpeed</tt><big>(</big><em>speed</em><big>)</big><a class="headerlink" href="#morTimmy.motor_driver.MotorDriver.setSpeed" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will be used to set the speed of the motor
+valid values are between -255 and 255.
+Negative numbers will be used to put the motor in reverse
+whilst positive numbers will drive the motor forward. zero 
+will stop the motor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="morTimmy.motor_driver.main">
+<tt class="descclassname">morTimmy.motor_driver.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.motor_driver.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will only be called when the library is run directly
+Only to be used to do quick tests on the library.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">morTimmy Package</a><ul>
+<li><a class="reference internal" href="#module-morTimmy.arduino_motor_driver"><tt class="docutils literal"><span class="pre">arduino_motor_driver</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-morTimmy.arduino_serial_hardware_control"><tt class="docutils literal"><span class="pre">arduino_serial_hardware_control</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-morTimmy.hardware_control"><tt class="docutils literal"><span class="pre">hardware_control</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-morTimmy.morTimmy"><tt class="docutils literal"><span class="pre">morTimmy</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-morTimmy.motor_driver"><tt class="docutils literal"><span class="pre">motor_driver</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/morTimmy.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">morTimmy_raspberrypi 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Mathijs Mortimer.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
