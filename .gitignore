@@ -1,7 +1,9 @@
 # Ignore python .pyc library files
 *.pyc
 
-# Ignore sphinx docstring config and makefile
+
+# Ignore sphinx docstring config and makefile and my bash script for generating the docs
+generateDocs.sh         
 raspberrypi/docs/conf.py
 raspberrypi/docs/Makefile
 arduino/docs/conf.py

@@ -5,12 +5,16 @@ from motor_driver import MotorDriver
 
 class Motor(MotorDriver):
     """ This class is a child of the generic driver for DC Motors.
-        It will contain the class for working together with the
-        DC Motors connected to the arduino through the H-Bridge modules.
-        The H-Bridge module allows you to control motors in both
-        directions. Interface will be handled through a serial
-        connection between the raspberry pi and the arduino.
-        (TODO, write arduino serial remote control library)
+    It will contain the class for working together with the
+    DC Motors connected to the arduino through the H-Bridge modules.
+
+    The H-Bridge module allows you to control motors in both
+    directions.
+
+    Interface will be handled through a serial
+    connection between the raspberry pi and the arduino.
+
+    (TODO, write arduino serial remote control library)
     """
 
     def __init__(self, motorID):
@@ -20,12 +24,12 @@ class Motor(MotorDriver):
 
     def setSpeed(self, speed):
         """ This function will be used to set the speed of the motor
-            valid values are between -255 and 255.
-            Negative numbers will be used to put the motor in reverse
-            whilst positive numbers will drive the motor forward.
-            Zero will stop the motor
-        """
 
+        Args:
+          speed (int): sets the speed of the motor. Valid values are
+          between -255 and 255. Negative numbers will put the motor
+          in reverse. Zero will stop the motor
+        """
         self.currentSpeed = speed
 
     def getSpeed(self):
@@ -35,8 +39,8 @@ class Motor(MotorDriver):
 
 
 def main():
-    """ This function will only be called when the library is run 
-        directly Only to be used to do quick tests on the library 
+    """ This function will only be called when the library is run
+    directly Only to be used to do quick tests on the library
     """
 
     print ("Hello World! This is the library for controlling DC motors "

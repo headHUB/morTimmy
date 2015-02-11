@@ -6,16 +6,23 @@ import serial
 
 class ArduinoSerialController(HardwareController):
     """ This class is an abstraction layer to allow communication
-        to the low level hardware layer. It will be able to send
-        and receive data from the Arduino microcontroller using
-        a serial interface.
+    to the low level hardware layer. It will be able to send
+    and receive data from the Arduino microcontroller using
+    a serial interface.
     """
 
     def __init__(self, serialPort='/dev/ttyS0',
                  baudrate=115200,
                  stopbits=serial.STOPBITS_ONE,
                  bytesize=serial.EIGHTBITS):
-        """ The initialisation for the ArduinoSerialController class """
+        """ The initialisation for the ArduinoSerialController class
+
+        Args:
+          serialPort (str): The port used to communicate with the Arduino
+          baudrate (int): The baudrate of the serial connection
+          stopbits (int): The stopbits of the serial connection
+          bytesize (int): The bytesize of the serial connection
+        """
         self.channel = serial.Serial(serialPort, baudrate)
 
     def __del__(self):
@@ -24,24 +31,33 @@ class ArduinoSerialController(HardwareController):
 
     def __send(self, data):
         """ This function sends data onto the serial port
-            towards the arduino. It's used by the generic
-            HardwareController class to send commands towards
-            the Arduino.
+        towards the arduino. It's used by the generic
+        HardwareController class to send commands towards
+        the Arduino.
+
+        Args:
+          data (str): The data string to send to the arduino. This
+            is used by the public sendCommand() function
         """
         self.channel.write(data)
 
     def __recv(self):
         """ This function receives data from the Arduino through
-            the serial port. It's used by the generic
-            HardwareController class to send commands towards the
-            Arduino.
+        the serial port. It's used by the generic
+        HardwareController class to send commands towards the
+        Arduino.
+
+        Returns:
+          returns the data received through the serial controller.
+          It will only grab the amount of bytes that consists of a
+          command and it's corresponding data
         """
         return self.channel.read(self.commandSize+self.dataSize)
 
 
 def main():
-    """ This function will only be called when the library is run directly
-        Only to be used to do quick tests on the library.
+    """ This function will only be called when the library is
+    run directly. Only to be used to do quick tests on the library.
     """
 
     try:

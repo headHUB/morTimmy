@@ -25,7 +25,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="morTimmy_raspberrypi 0.1 documentation" href="index.html" /> 
+    <link rel="top" title="morTimmy_raspberrypi 0.1 documentation" href="index.html" />
+    <link rel="up" title="morTimmy" href="modules.html" />
+    <link rel="prev" title="morTimmy" href="modules.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,7 +39,11 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">morTimmy_raspberrypi 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="modules.html" title="morTimmy"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">morTimmy_raspberrypi 0.1 documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">morTimmy</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -56,11 +62,12 @@
 <dd><p>Bases: <a class="reference internal" href="#morTimmy.motor_driver.MotorDriver" title="morTimmy.motor_driver.MotorDriver"><tt class="xref py py-class docutils literal"><span class="pre">morTimmy.motor_driver.MotorDriver</span></tt></a></p>
 <p>This class is a child of the generic driver for DC Motors.
 It will contain the class for working together with the
-DC Motors connected to the arduino through the H-Bridge modules.
-The H-Bridge module allows you to control motors in both
-directions. Interface will be handled through a serial
-connection between the raspberry pi and the arduino.
-(TODO, write arduino serial remote control library)</p>
+DC Motors connected to the arduino through the H-Bridge modules.</p>
+<p>The H-Bridge module allows you to control motors in both
+directions.</p>
+<p>Interface will be handled through a serial
+connection between the raspberry pi and the arduino.</p>
+<p>(TODO, write arduino serial remote control library)</p>
 <dl class="method">
 <dt id="morTimmy.arduino_motor_driver.Motor.getSpeed">
 <tt class="descname">getSpeed</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.arduino_motor_driver.Motor.getSpeed" title="Permalink to this definition">¶</a></dt>
@@ -70,11 +77,13 @@ connection between the raspberry pi and the arduino.
 <dl class="method">
 <dt id="morTimmy.arduino_motor_driver.Motor.setSpeed">
 <tt class="descname">setSpeed</tt><big>(</big><em>speed</em><big>)</big><a class="headerlink" href="#morTimmy.arduino_motor_driver.Motor.setSpeed" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function will be used to set the speed of the motor
-valid values are between -255 and 255.
-Negative numbers will be used to put the motor in reverse
-whilst positive numbers will drive the motor forward.
-Zero will stop the motor</p>
+<dd><p>This function will be used to set the speed of the motor</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>speed (int): sets the speed of the motor. Valid values are
+between -255 and 255. Negative numbers will put the motor
+in reverse. Zero will stop the motor</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -82,7 +91,7 @@ Zero will stop the motor</p>
 <dl class="function">
 <dt id="morTimmy.arduino_motor_driver.main">
 <tt class="descclassname">morTimmy.arduino_motor_driver.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.arduino_motor_driver.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function will only be called when the library is run 
+<dd><p>This function will only be called when the library is run
 directly Only to be used to do quick tests on the library</p>
 </dd></dl>
 
@@ -102,8 +111,8 @@ a serial interface.</p>
 <dl class="function">
 <dt id="morTimmy.arduino_serial_hardware_control.main">
 <tt class="descclassname">morTimmy.arduino_serial_hardware_control.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.arduino_serial_hardware_control.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function will only be called when the library is run directly
-Only to be used to do quick tests on the library.</p>
+<dd><p>This function will only be called when the library is
+run directly. Only to be used to do quick tests on the library.</p>
 </dd></dl>
 
 </div>
@@ -118,7 +127,16 @@ and receive data from the microcontroller.</p>
 <dl class="method">
 <dt id="morTimmy.hardware_control.HardwareController.getCommand">
 <tt class="descname">getCommand</tt><big>(</big><big>)</big><a class="headerlink" href="#morTimmy.hardware_control.HardwareController.getCommand" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function will retrieve data from the specified module</p>
+<dd><p>This function will retrieve data from the
+specified module</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>self.__recv (str): Returns a command received from the hardware</dt>
+<dd>controller</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -128,10 +146,16 @@ and receive data from the microcontroller.</p>
 The command and data size will be predetermined and combined
 into a single string. This string will be sent to the arduino
 for parsing.</p>
-<p>A command can be less than commandSize and will
-add trailing whitespaces to meet the required commandSize.</p>
-<p>The data is not mandatory. If no data is provided it will
-be padded with whitespaces to meet the required dataSize.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>command (str): A command can be less than commandSize and will</dt>
+<dd>add trailing whitespaces to meet the required commandSize.</dd>
+<dt>data (str): The data is not mandatory. If no data is provided it will</dt>
+<dd>be padded with whitespaces to meet the required dataSize.</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -186,8 +210,8 @@ logic. The main action happens in the Robot class</p>
 <dt id="morTimmy.motor_driver.MotorDriver">
 <em class="property">class </em><tt class="descclassname">morTimmy.motor_driver.</tt><tt class="descname">MotorDriver</tt><a class="headerlink" href="#morTimmy.motor_driver.MotorDriver" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class is a generic driver for DC Motors.
-It will contain the basic skeleton for working with DC motors.
-Specific child classes will be created based on this class
+It will contain the basic skeleton for working with DC motors.</p>
+<p>Specific child classes will be created based on this class
 for different types of motors in the project.</p>
 <dl class="method">
 <dt id="morTimmy.motor_driver.MotorDriver.getSpeed">
@@ -201,7 +225,7 @@ for different types of motors in the project.</p>
 <dd><p>This function will be used to set the speed of the motor
 valid values are between -255 and 255.
 Negative numbers will be used to put the motor in reverse
-whilst positive numbers will drive the motor forward. zero 
+whilst positive numbers will drive the motor forward. zero
 will stop the motor.</p>
 </dd></dl>
 
@@ -235,6 +259,9 @@ Only to be used to do quick tests on the library.</p>
 </li>
 </ul>
 
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="previous chapter">morTimmy</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/morTimmy.txt"
@@ -266,7 +293,11 @@ Only to be used to do quick tests on the library.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">morTimmy_raspberrypi 0.1 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="modules.html" title="morTimmy"
+             >previous</a> |</li>
+        <li><a href="index.html">morTimmy_raspberrypi 0.1 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >morTimmy</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -3,8 +3,8 @@
 
 class HardwareController():
     """ This class is an abstraction layer to allow communication
-        to the low level hardware layer. It will be able to send
-        and receive data from the microcontroller.
+    to the low level hardware layer. It will be able to send
+    and receive data from the microcontroller.
     """
 
     __commandSize = 4      # Size of the recv and send command in Bytes
@@ -12,14 +12,14 @@ class HardwareController():
 
     def sendCommand(self, command, data=''):
         """ This function will send a command to the specified module.
-            The command and data size will be predetermined and combined
-            into a single string. This string will be sent to the arduino
-            for parsing.
+        The command and data size will be predetermined and combined
+        into a single string. This string will be sent to the arduino
+        for parsing.
 
-            A command can be less than commandSize and will
+        Args:
+          command (str): A command can be less than commandSize and will
             add trailing whitespaces to meet the required commandSize.
-
-            The data is not mandatory. If no data is provided it will
+          data (str): The data is not mandatory. If no data is provided it will
             be padded with whitespaces to meet the required dataSize.
         """
 
@@ -37,7 +37,13 @@ class HardwareController():
         self.__send(sendString)
 
     def getCommand(self):
-        """ This function will retrieve data from the specified module """
+        """ This function will retrieve data from the
+        specified module
+
+        Returns:
+          self.__recv (str): Returns a command received from the hardware
+            controller
+        """
         return self.__recv()
 
     def __send(self, data):
@@ -50,7 +56,7 @@ class HardwareController():
 
 def main():
     """ This function will only be called when the library is run directly
-        Only to be used to do quick tests on the library.
+    Only to be used to do quick tests on the library.
     """
 
     print "Hello World, this is the generic hardware driver library"

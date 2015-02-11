@@ -12,16 +12,33 @@ REAR_RIGHT_MOTOR_ID = 4
 
 class Robot:
     """ This class will hold the logic for our robot morTimmy.
-        The brain of the robot is a raspberry Pi and the low level
-        electronic are handled by an Arduino. The Arduino provides
-        an interface to the DC motors and various sensors
+    The brain of the robot is a raspberry Pi and the low level
+    electronic are handled by an Arduino. The Arduino provides
+    an interface to the DC motors and various sensors
     """
 
     def __init__(self, frontLeftMotorID, frontRightMotorID,
                  rearLeftMotorID, rearRightMotorID):
-        """ This function is called when the robot class is created
-            At the moment we only launch into the self.initialize()
-            function
+        """ Called when the robot class is created.
+        At the moment we only launch into the self.initialize()
+        function
+
+        Args:
+          frontLeftMotorID (int): Motor ID of the front left DC
+            motor
+          frontRightMotorID (int): Motor ID of the front right
+            DC motor
+          rearLeftMotorID (int): Motor ID of the rear left DC
+            motor
+          rearRightMotorID (int): Motor ID of the rear right
+            DC motor
+
+        Returns:
+          The function doesn't explicitly return anything. Python
+          defaults to return None in this case
+
+        Raises:
+          TODO: Add proper error handling.
         """
         self.frontLeftMotor = Motor(frontLeftMotorID)
         self.frontRightMotor = Motor(frontRightMotorID)
@@ -32,15 +49,15 @@ class Robot:
 
     def initialize(self):
         """ This function will (re)initialize the robot. We have
-            this in a seperate function (opposed to __init__) so we
-            can easily reinitialise the robot within our class
+        this in a seperate function (opposed to __init__) so we
+        can easily reinitialise the robot within our class
         """
         pass
 
     def run(self):
         """ This function contains the main robot loop
-            as an initial test we're going to get the
-            robot to spin constantly
+        as an initial test we're going to get the
+        robot to spin constantly
         """
         print "The (hello) world keeps spinning!!"
         self.frontLeftMotor.setSpeed(255)
@@ -51,8 +68,8 @@ class Robot:
 
 def main():
     """ This is the main function of our script.
-        It will only contain a very limited program
-        logic. The main action happens in the Robot class
+    It will only contain a very limited program
+    logic. The main action happens in the Robot class
     """
     morTimmy = Robot(FRONT_LEFT_MOTOR_ID,
                      FRONT_RIGHT_MOTOR_ID,
