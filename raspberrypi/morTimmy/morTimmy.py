@@ -19,21 +19,29 @@ class Robot:
 
     def __init__(self, frontLeftMotorID, frontRightMotorID,
                  rearLeftMotorID, rearRightMotorID):
-        """ This function initialises our robot.
-            It only requires the various motor IDs for now
+        """ This function is called when the robot class is created
+            At the moment we only launch into the self.initialize()
+            function
         """
-
         self.frontLeftMotor = Motor(frontLeftMotorID)
         self.frontRightMotor = Motor(frontRightMotorID)
         self.rearLeftMotor = Motor(rearLeftMotorID)
         self.rearRightMotor = Motor(rearRightMotorID)
+
+        self.initialize()
+
+    def initialize(self):
+        """ This function will (re)initialize the robot. We have
+            this in a seperate function (opposed to __init__) so we
+            can easily reinitialise the robot within our class
+        """
+        pass
 
     def run(self):
         """ This function contains the main robot loop
             as an initial test we're going to get the
             robot to spin constantly
         """
-
         print "The (hello) world keeps spinning!!"
         self.frontLeftMotor.setSpeed(255)
         self.frontRightMotor.setSpeed(-255)
@@ -46,7 +54,6 @@ def main():
         It will only contain a very limited program
         logic. The main action happens in the Robot class
     """
-
     morTimmy = Robot(FRONT_LEFT_MOTOR_ID,
                      FRONT_RIGHT_MOTOR_ID,
                      REAR_LEFT_MOTOR_ID,
