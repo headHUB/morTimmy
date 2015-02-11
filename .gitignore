@@ -1,7 +1,7 @@
 # Ignore python .pyc library files
 *.pyc
 *.swp
-
+.DS_Store
 # Ignore sphinx docstring config and makefile and my bash script for generating the docs
 generateDocs.sh         
 raspberrypi/docs/conf.py

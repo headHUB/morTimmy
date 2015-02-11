@@ -6,7 +6,10 @@
 
 // INCLUDES
 
+#include "Arduino.h"            // required for access to the core arduino stuff like analogWrite and pinMode
 #include "L298N_motor_driver.h"
+#include <NewPing.h>
+#include "newping_distance_sensor.h"
 
 
 // PIN DEFINITIONS
@@ -29,7 +32,10 @@
 #define REAR_RIGHT_MOTOR_SPEED_PIN 12         // Has to be a PWM supported pin
 
 // Distance Sensor Pins
-
+#define DISTANCE_SENSOR_TRIG_PIN 22
+#define DISTANCE_SENSOR_ECHO_PIN 23
+#define TOO_CLOSE 10                         // distance in cm to an obstacle the robot should avoid 
+#define MAX_DISTANCE (TOO_CLOSE * 20)        // maximum distance in cm the sensor will measure 
 
 // CLASS DEFINITIONS
 
@@ -39,18 +45,35 @@ namespace morTimmy {
             /*
              * @brief Class constructor
              */
-            Robot() {
-                initialize();
+            Robot() 
+                : leftMotors(FRONT_LEFT_MOTOR_DIRECTION_PIN_1, 
+                             FRONT_LEFT_MOTOR_DIRECTION_PIN_2,
+                             FRONT_LEFT_MOTOR_SPEED_PIN,
+                             REAR_LEFT_MOTOR_DIRECTION_PIN_1,
+                             REAR_LEFT_MOTOR_DIRECTION_PIN_2,
+                             REAR_LEFT_MOTOR_SPEED_PIN),
+                  rightMotors(FRONT_RIGHT_MOTOR_DIRECTION_PIN_1,
+                              FRONT_RIGHT_MOTOR_DIRECTION_PIN_2,
+                              FRONT_RIGHT_MOTOR_SPEED_PIN,
+                              REAR_RIGHT_MOTOR_DIRECTION_PIN_1,
+                              REAR_RIGHT_MOTOR_DIRECTION_PIN_2,
+                              REAR_RIGHT_MOTOR_SPEED_PIN),
+                  distanceSensor(DISTANCE_SENSOR_TRIG_PIN,
+                                 DISTANCE_SENSOR_ECHO_PIN,
+                                 MAX_DISTANCE)          
+            {
             }
+
 
             /*
              * @brief initialize the robot
              */
             void initialize()
             {
-                Serial.println "Initializing robot";
-                state = stateStopped;
-                stateStartTime = millis();
+                Serial.println("Initializing robot");
+                leftMotors.setSpeed(255);
+                rightMotors.setSpeed(255);
+                state = stateRunning;
             }
 
 
@@ -59,48 +82,21 @@ namespace morTimmy {
              * Must be called repeatedly while the robot is in operation.
              */
             void run() {
-                unsigned long currentTime = millis();
-                unsigned long elapsedTime = currentTime - stateStartTime;
-                switch(state) {
-                    case stateStopped:
-                        if (elapsedTime >= 5000) {
-                            leftMotors.setSpeed(255);
-                            rightMotors.setSpeed(255);
-                            state = stateRunning;
-                            stateStartTime = currentTime;
-                        }
-                        break;
-                    case stateRunning:
-                        if (elapsedTime >= 8000) {
-                            leftMotors.setSpeed(0);
-                            rightMotors.setSpeed(0);
-                            state = stateStopped;
-                            stateStartTime = currentTime;
-                        }
-                        break;
-                    }
-                }
+              if (state == stateRunning) {
+                if (distanceSensor.getDistance() <= TOO_CLOSE) {
+                  state = stateStopped;
+                  leftMotors.setSpeed(0);
+                  rightMotors.setSpeed(0);
+                }    
+              }
+            }
 
         private:
-            // Controls the front and rear left DC motors
-            Motor leftMotors(FRONT_LEFT_MOTOR_DIRECTION_PIN_1,
-                             FRONT_LEFT_MOTOR_DIRECTION_PIN_2,
-                             FRONT_LEFT_MOTOR_SPEED_PIN,
-                             REAR_LEFT_MOTOR_DIRECTION_PIN_1,
-                             REAR_LEFT_MOTOR_DIRECTION_PIN_2,
-                             REAR_LEFT_MOTOR_SPEED_PIN)
-
-            // Controls the front and rear right DC motors
-            Motor rightMotors(FRONT_RIGHT_MOTOR_DIRECTION_PIN_1,
-                              FRONT_RIGHT_MOTOR_DIRECTION_PIN_2,
-                              FRONT_RIGHT_MOTOR_SPEED_PIN,
-                              REAR_RIGHT_MOTOR_DIRECTION_PIN_1,
-                              REAR_RIGHT_MOTOR_DIRECTION_PIN_2,
-                              REAR_RIGHT_MOTOR_SPEED_PIN)
-
-            // Private variables related to the robot state
-            enum state_t { stateStopped, stateRunning };
-            state_t state                                   // Holds the current robot state
+            Motor leftMotors;    // Controls the front and rear left DC motors
+            Motor rightMotors;   // Controls the front and rear right DC motors
+            DistanceSensor distanceSensor;
+            enum state_t { stateStopped, stateRunning };    // Various robot states
+            state_t state;                                  // Holds the current robot state
             unsigned long stateStartTime;                   // Holds the start time of the current state
     };
 };
@@ -108,7 +104,7 @@ namespace morTimmy {
 morTimmy::Robot robot;
 
 void setup() {
-    Serial.begin(115400);
+    Serial.begin(9600);
     robot.initialize();
 }
 
