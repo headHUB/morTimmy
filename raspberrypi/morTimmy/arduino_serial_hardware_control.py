@@ -13,10 +13,11 @@ class ArduinoSerialController(HardwareController):
                 'goLeft': 'A',
                 'goRight': 'D'}
 
-    def __init__(self, serialPort='/dev/ttyS0',
-                 baudrate=115200,
+    def __init__(self, serialPort='/dev/ttyACM0',
+                 baudrate=9600,
                  stopbits=serial.STOPBITS_ONE,
-                 bytesize=serial.EIGHTBITS):
+                 bytesize=serial.EIGHTBITS,
+                 timeout=0):
         """ The initialisation for the ArduinoSerialController class
 
         Args:
@@ -24,6 +25,10 @@ class ArduinoSerialController(HardwareController):
           baudrate (int): The baudrate of the serial connection
           stopbits (int): The stopbits of the serial connection
           bytesize (int): The bytesize of the serial connection
+          timeout (float): The timeout for the serial read command
+                           None wait forever
+                           0 non blocking
+                           x set timeout to x seconds (float allowed)
         """
         self.channel = serial.Serial(serialPort, baudrate)
 
@@ -31,7 +36,7 @@ class ArduinoSerialController(HardwareController):
         """ Close the serial connection when the class is deleted """
         self.channel.close()
 
-    def __send(self, data):
+    def send(self, data):
         """ Send data onto the serial port towards the arduino.
 
         Used by the generic HardwareController class to send
@@ -41,9 +46,10 @@ class ArduinoSerialController(HardwareController):
           data (str): The data string to send to the arduino. This
             is used by the public sendCommand() function
         """
+        print "morTimmy: %s" % data
         self.channel.write(data)
 
-    def __recv(self):
+    def recv(self):
         """ Receive data from the Arduino through the serial port.
 
         Used by the generic HardwareController class to receive
@@ -54,7 +60,11 @@ class ArduinoSerialController(HardwareController):
           It will only grab the amount of bytes that consists of a
           command and it's corresponding data
         """
-        return self.channel.read(self.commandSize+self.dataSize)
+        data = self.channel.readline()
+        if data:
+            return data.strip()
+        else:
+            return None
 
 
 def main():
