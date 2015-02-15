@@ -10,6 +10,7 @@ setup(name='morTimmy',
       url='https://github.com/thiezn/morTimmy',
       packages=['morTimmy'],
       install_requires=[
-          'pyserial>=2.7'
+          'pyserial>=2.7',
+	  'pybluez>=0.20'
           ]
       )
