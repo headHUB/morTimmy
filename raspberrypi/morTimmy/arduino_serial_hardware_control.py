@@ -8,6 +8,11 @@ class ArduinoSerialController(HardwareController):
 
     """ Serial interface into the Arduino microcontroller """
 
+    commands = {'goForward': 'W',
+                'goBack': 'S',
+                'goLeft': 'A',
+                'goRight': 'D'}
+
     def __init__(self, serialPort='/dev/ttyS0',
                  baudrate=115200,
                  stopbits=serial.STOPBITS_ONE,

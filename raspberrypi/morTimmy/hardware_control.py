@@ -7,8 +7,8 @@ class HardwareController():
     It will be able to send and receive data from the microcontroller.
     """
 
-    __commandSize = 4      # Size of the recv and send command in Bytes
-    __dataSize = 12        # Size of the recv and send data in Bytes
+    __commandSize = 1      # Size of the recv and send command in Bytes
+    __dataSize = 0        # Size of the recv and send data in Bytes
 
     def sendCommand(self, command, data=''):
         """ Send a command to the hardware controller.

@@ -2,6 +2,7 @@
 
 # imports
 from arduino_motor_driver import Motor
+from arduino_serial_hardware_control import HardwareControl
 
 # Motor ID definitions
 FRONT_LEFT_MOTOR_ID = 1
@@ -17,6 +18,13 @@ class Robot:
     electronic are handled by an Arduino. The Arduino provides
     an interface to the DC motors and various sensors
     """
+
+    commands = {'goForward': 'W',
+                'goBack': 'S',
+                'goLeft': 'A',
+                'goRight': 'D'}
+   
+    arduino = ArduinoSerialController()
 
     def __init__(self, frontLeftMotorID, frontRightMotorID,
                  rearLeftMotorID, rearRightMotorID):
@@ -58,17 +66,11 @@ class Robot:
         pass
 
     def run(self):
-        """ The main robot loop
+        """ The main robot loop """
 
-        As an initial test we're going to get the
-        robot to spin constantly
-        """
-        print "The (hello) world keeps spinning!!"
-        self.frontLeftMotor.setSpeed(255)
-        self.frontRightMotor.setSpeed(-255)
-        self.rearLeftMotor.setSpeed(255)
-        self.rearRightMotor.setSpeed(-255)
-
+	print "Moving motor forward"
+	arduino.sendCommand(commands['goForward'])
+	
 
 def main():
     """ This is the main function of our script.
