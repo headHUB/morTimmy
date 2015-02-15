@@ -13,6 +13,8 @@
 #include <Servo.h>
 #include "raspberry_remote_control.h"
 
+#define RUN_TIME 30
+
 // PIN DEFINITIONS
 
 // DC Motor Pins
@@ -65,7 +67,8 @@ namespace morTimmy {
                               REAR_RIGHT_MOTOR_SPEED_PIN),
                   distanceSensor(DISTANCE_SENSOR_TRIG_PIN,
                                  DISTANCE_SENSOR_ECHO_PIN,
-                                 MAX_DISTANCE)          
+                                 MAX_DISTANCE),
+                  remoteControl()     
             {
             }
 
@@ -78,7 +81,7 @@ namespace morTimmy {
                 Serial.println("Initializing robot");
                 leftMotors.setSpeed(255);
                 rightMotors.setSpeed(255);
-                state = stateRunning;
+                state = stateMoving;
             }
 
 
@@ -87,22 +90,138 @@ namespace morTimmy {
              * Must be called repeatedly while the robot is in operation.
              */
             void run() {
-              if (state == stateRunning) {
-                if (distanceSensor.getDistance() <= TOO_CLOSE) {
-                  state = stateStopped;
-                  leftMotors.setSpeed(0);
-                  rightMotors.setSpeed(0);
-                }    
+              unsigned long currentTime = millis();
+              //int distance = distanceAverage.add(distanceSensor.getDistance());
+              int distance = distanceSensor.getDistance();
+              RemoteControlDriver::command_t remoteCmd;
+              bool haveRemoteCmd = remoteControl.getRemoteCommand(remoteCmd);
+              //log("state: %d, currentTime: %lu, distance: %u remote: (%d,l:%d,r:%d,k:%d)\n", 
+           //   state, currentTime, distance, 
+          //    haveRemoteCmd, remoteCmd.left, remoteCmd.right, remoteCmd.key);
+
+              if (remoteControlled()) {
+                if (haveRemoteCmd) {
+                  switch (remoteCmd.key) {
+                    case RemoteControlDriver::command_t::keyF1:
+                      // start "roomba" mode
+                      move();
+                      break;
+                  case RemoteControlDriver::command_t::keyNone:
+                      // this is a directional command
+                      leftMotors.setSpeed(remoteCmd.left);
+                      rightMotors.setSpeed(remoteCmd.right);
+                      break;
+                  default:
+                      break;
+                  }
+                }
+              }
+              else {
+                // "roomba" mode
+                if (haveRemoteCmd && remoteCmd.key == RemoteControlDriver::command_t::keyF1) {
+                  remote();
+                }
+                else {
+                  if (moving()) {
+                    if (obstacleAhead(distance)) {
+                        turn(currentTime);
+                    }
+                  }
+                  else if (turning()) {
+                    if (doneTurning(currentTime, distance)) {
+                      move();
+                    }
+                  }
+                }
               }
             }
+            
+            /**
+              * @brief Move robot forward
+              */
+            void move() {
+              leftMotors.setSpeed(255);
+              rightMotors.setSpeed(255);
+              state = stateMoving;
+            }
+
+            /**
+              * @brief Stop moving Robot
+              */
+            void stop() {
+              leftMotors.setSpeed(0);
+              rightMotors.setSpeed(0);
+              state = stateStopped;
+            }
+            
+            /**
+              * @brief Check if we are done running
+              */
+            bool doneRunning(unsigned long currentTime) {
+              return (currentTime >= endTime);
+            }
+              
+            /**
+              * @brief check if there's an obstacle in sight
+              */
+            bool obstacleAhead(unsigned int distance) {
+              return (distance <= TOO_CLOSE);
+            }
+            
+            /**
+              * @brief Turn the robot
+              */
+            bool turn(unsigned long currentTime) {
+              if(random(2) == 0) {
+                leftMotors.setSpeed(-255);
+                rightMotors.setSpeed(255);
+              }
+              else {
+                leftMotors.setSpeed(255);
+                rightMotors.setSpeed(-255);
+              }
+              state = stateTurning;
+              endStateTime = currentTime + random(500, 1000);
+            }
+            
+            /**
+              * @brief Check if we're done turning
+              */
+            bool doneTurning(unsigned long currentTime, unsigned int distance) {
+              if (currentTime >= endStateTime) {
+                return (distance > TOO_CLOSE);
+              }
+              return false;
+            }
+                    
+            /**
+              * @brief This gets called when state is changed to stateRemote
+              */
+            void remote()
+            {
+              leftMotors.setSpeed(0);
+              rightMotors.setSpeed(0);
+              state = stateRemote;
+            }
+            
+            // Functions to check if the given state is True
+            // Used for making the code more readable.
+            bool stopped() { return (state == stateStopped); }
+            bool moving() { return (state == stateMoving); }
+            bool turning() { return (state == stateTurning); }
+            bool remoteControlled() { return (state == stateRemote); }
+
 
         private:
-            Motor leftMotors;    // Controls the front and rear left DC motors
-            Motor rightMotors;   // Controls the front and rear right DC motors
-            DistanceSensor distanceSensor;
-            enum state_t { stateStopped, stateRunning };    // Various robot states
+            Motor leftMotors;                // Controls the front and rear left DC motors
+            Motor rightMotors;               // Controls the front and rear right DC motors
+            DistanceSensor distanceSensor;   // Holds the Distance Sensor class
+            unsigned long endTime;           // end time of ??
+            unsigned long endStateTime;      // current time + random value used for turning the robot
+            enum state_t { stateStopped, stateMoving, stateTurning, stateRemote };    // Various robot states
             state_t state;                                  // Holds the current robot state
             unsigned long stateStartTime;                   // Holds the start time of the current state
+            RemoteControl remoteControl;                    // Holds the raspberry remote control class 
     };
 };
 
