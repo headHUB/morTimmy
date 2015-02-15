@@ -79,9 +79,9 @@ namespace morTimmy {
             void initialize()
             {
                 Serial.println("Initializing robot");
-                leftMotors.setSpeed(255);
-                rightMotors.setSpeed(255);
-                state = stateMoving;
+                leftMotors.setSpeed(0);
+                rightMotors.setSpeed(0);
+                state = stateRemote;
             }
 
 
@@ -100,6 +100,11 @@ namespace morTimmy {
           //    haveRemoteCmd, remoteCmd.left, remoteCmd.right, remoteCmd.key);
 
               if (remoteControlled()) {
+                // send the current distance to the raspberry
+                Serial.print("distance: ");
+                Serial.println(distance);
+                
+                // Check if we received a command
                 if (haveRemoteCmd) {
                   switch (remoteCmd.key) {
                     case RemoteControlDriver::command_t::keyF1:
@@ -108,6 +113,7 @@ namespace morTimmy {
                       break;
                   case RemoteControlDriver::command_t::keyNone:
                       // this is a directional command
+                      Serial.println("received direction");
                       leftMotors.setSpeed(remoteCmd.left);
                       rightMotors.setSpeed(remoteCmd.right);
                       break;
