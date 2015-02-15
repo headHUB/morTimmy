@@ -10,11 +10,12 @@
 #include "L298N_motor_driver.h"
 #include <NewPing.h>
 #include "newping_distance_sensor.h"
-
+#include <Servo.h>
+#include "raspberry_remote_control.h"
 
 // PIN DEFINITIONS
 
-// Motor Pins
+// DC Motor Pins
 #define FRONT_LEFT_MOTOR_DIRECTION_PIN_1 1
 #define FRONT_LEFT_MOTOR_DIRECTION_PIN_2 2
 #define FRONT_LEFT_MOTOR_SPEED_PIN 3          // Has to be a PWM supported pin
@@ -30,6 +31,10 @@
 #define REAR_RIGHT_MOTOR_DIRECTION_PIN_1 10
 #define REAR_RIGHT_MOTOR_DIRECTION_PIN_2 11
 #define REAR_RIGHT_MOTOR_SPEED_PIN 12         // Has to be a PWM supported pin
+
+// Servo Motor Pins
+#define BOTTOM_PANTILT_SERVO_PIN 3            // PWM
+#define TOP_PANTILT_SERVO_PIN 4               // PWM
 
 // Distance Sensor Pins
 #define DISTANCE_SENSOR_TRIG_PIN 22
