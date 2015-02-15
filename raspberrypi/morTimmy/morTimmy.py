@@ -2,7 +2,7 @@
 
 # imports
 from arduino_motor_driver import Motor
-from arduino_serial_hardware_control import HardwareControl
+from arduino_serial_hardware_control import ArduinoSerialController
 
 # Motor ID definitions
 FRONT_LEFT_MOTOR_ID = 1
@@ -68,9 +68,14 @@ class Robot:
     def run(self):
         """ The main robot loop """
 
-	print "Moving motor forward"
-	arduino.sendCommand(commands['goForward'])
-	
+        recvCommand = self.arduino.getCommand()
+        if recvCommand:
+            print recvCommand
+            if '200' in recvCommand: 
+                self.arduino.sendCommand(self.commands['goForward'])
+            else:
+                self.arduino.sendCommand(self.commands['goBack'])
+
 
 def main():
     """ This is the main function of our script.
@@ -82,8 +87,12 @@ def main():
                      FRONT_RIGHT_MOTOR_ID,
                      REAR_LEFT_MOTOR_ID,
                      REAR_RIGHT_MOTOR_ID)
-    morTimmy.run()
 
+    try:
+        while(True):
+            morTimmy.run()
+    except KeyboardInterrupt:
+        print "Thanks for running me!"
 
 if __name__ == '__main__':
     main()
