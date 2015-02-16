@@ -3,6 +3,8 @@
 # imports
 from arduino_motor_driver import Motor
 from arduino_serial_hardware_control import ArduinoSerialController
+from bluetooth_remote_control import RemoteController
+
 
 # Motor ID definitions
 FRONT_LEFT_MOTOR_ID = 1
@@ -25,6 +27,7 @@ class Robot:
                 'goRight': 'D'}
 
     arduino = ArduinoSerialController()
+    remoteControl = RemoteController()
 
     def __init__(self, frontLeftMotorID, frontRightMotorID,
                  rearLeftMotorID, rearRightMotorID):
@@ -68,10 +71,12 @@ class Robot:
     def run(self):
         """ The main robot loop """
 
-        recvCommand = self.arduino.recvCommand()
-        if recvCommand:
-            print recvCommand
-            if '200' in recvCommand:
+        remoteRecvCommand = self.remoteControl.recvCommand()
+
+        arduinoRecvCommand = self.arduino.recvCommand()
+        if arduinoRecvCommand:
+            print arduinoRecvCommand
+            if '200' in arduinoRecvCommand:
                 self.arduino.sendCommand(self.commands['goForward'])
             else:
                 self.arduino.sendCommand(self.commands['goBack'])

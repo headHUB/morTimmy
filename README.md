@@ -57,8 +57,14 @@ What have I done so far:
   homepage http://morTimmy.mortimer.nl/
 - Received the hardware order I've placed with http://www.hobbycomponents.com/
 
+### Images of build process
   ![Screenshot of hardware ordered from hobbycomponents.com](http://raw.github.com/thiezn/morTimmy/master/images/hw_order.jpg)
 
+### Hard- and Software Interfaces schematic
+
+The following schematic shows the various interfaces between the hardware and software components of morTimmy the Robot. Keep in mind that these will likely change over time as the project develops.
+
+  ![morTimmy Interfaces schematics] (http://raw.github.com/thiezn/morTimmy/master/images/morTimmy_Interfaces.png)
 
 ## Credits
 
