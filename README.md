@@ -13,7 +13,7 @@ The goal of this project is to build a autonomous robot that can be expanded upo
 
 ## Hardware details
 
-I've purchased the following initial hardware from the british site http://www.hobbycomponents.com/. It was the only site that I could find in Europe that had alot of the required components and had a lot of positive reviews.
+I've purchased the following initial hardware from the british site http://www.hobbycomponents.com/. It was the only site that I could find in Europe that had alot of the required components and had a lot of positive reviews. These parts will allow me to build the basic robot chassis for testing
 
 - 1x Ultrasonic Module HC-SR04 Distance Sensor
 - 2x L298N Stepper Motor Driver Controller Board
@@ -23,6 +23,25 @@ I've purchased the following initial hardware from the british site http://www.h
 - 2x Towerpro SG90 Micro servo 9g
 - 1x 4 Wheeled Robot Smart Car Chassis Kit DC 3v 5v 6v suitable for Arduino
 - 1x 20cm Solderless Female to Female DuPont Jumper Breadboard Wires (40-Cable Pack)
+
+Next thing I need to take care of is the power supply. Initially I wanted to get a LiPo rechargable battery back with a USB circuit to recharge it. After some research I found out that I would need at least two LiPo backs in series (giving me 3.7x2 = 7.4V) but the available USB charger circuits would only work for single 3.7V packs. I decided on switching to LiPo 186500 batteries that I will install in a simple battery holder casing. I will have to remove the batteries from the holder to recharge them in a seperate charger. 
+
+Purchasing batteries, a battery holder and battery charger in the Netherlands I found was very expensive. On recommendation from a collegue I placed an order at a chinese compagny called http://www.lightinthebox.com. I also purchased a bluetooth adapter and a ps3 compatible bluetooth controller that I want to use to remote control morTimmy the robot
+- DIY 2-Slot 18650 Battery Holder with Pins – Black
+- AC Charger + 2xUltraFire 18650 3.7V 3000mAh Rechargeable Battery with EU 100-240V Plug 
+- Mini Bluetooth CSR V4.0 USB Dongle Adapter(Square)
+- Rechargeable Bluetooth Wireless Controller for PS3 
+
+The Raspberry Pi requires about 5V power and is sensitive to drops in voltage. Therefore to stabilise the voltage I decided to buy a so called UBEC. This is a switching voltage regulator that should be more efficient than the linear voltage regulator on the Raspberry Pi board itself. I purchased the following UBEC that came with pre-soldered micro-USB connector from the site http://dawnrobotics.co.uk
+- 3A UBEC for Raspberry Pi
+
+My intention is to implement voice control and audio playback into morTimmy. The raspberry does provide an stereo output jack but unfortunately no audio input. Also the power the output jack can provide is very low so I decided to purchase a low-cost USB audio interface for http://www.dx.com.
+- USB 2.0 Virtual 7.1 Channel Surround Sound Card Caleb (20cm-Cable)
+
+The last bit on my hardware kit list is a camera. I would like to use openCV on the Raspberry Pi so decided to purchase the official Raspberry Pi Camera module and the most recent Raspberry Pi model 2 B. This has a quad core processor which will allow me to use multiple threads on the different cores hopefully increasing performance dramatically over the previous Raspberry Pi models.
+- Raspberry Pi 2 B
+- Raspberry Pi Camera Module
+
 
 ## Project progress
 
@@ -34,7 +53,7 @@ What have I done so far:
 - Starting to use Docstrings to properly document my code. Trying to follow the
   Google Style Python Docstrings guidelines. Also implemented sphinx on my 
   home server to generate documentation from the Docstrings. The documentation
-  can be found in the relevant docs/ directories as well as on my personal
+  can be found in the relevant docs/ directories and on my personal
   homepage http://morTimmy.mortimer.nl/
 - Received the hardware order I've placed with http://www.hobbycomponents.com/
 
