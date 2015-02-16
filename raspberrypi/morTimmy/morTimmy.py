@@ -23,7 +23,7 @@ class Robot:
                 'goBack': 'S',
                 'goLeft': 'A',
                 'goRight': 'D'}
-   
+
     arduino = ArduinoSerialController()
 
     def __init__(self, frontLeftMotorID, frontRightMotorID,
@@ -68,10 +68,10 @@ class Robot:
     def run(self):
         """ The main robot loop """
 
-        recvCommand = self.arduino.getCommand()
+        recvCommand = self.arduino.recvCommand()
         if recvCommand:
             print recvCommand
-            if '200' in recvCommand: 
+            if '200' in recvCommand:
                 self.arduino.sendCommand(self.commands['goForward'])
             else:
                 self.arduino.sendCommand(self.commands['goBack'])

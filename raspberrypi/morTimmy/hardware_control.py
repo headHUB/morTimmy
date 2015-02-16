@@ -20,22 +20,15 @@ class HardwareController():
           data (str): The data is not mandatory. If no data is provided it will
             be padded with whitespaces to meet the required dataSize.
         """
-        self.send(''.join([command,data]))
+        pass
 
-    def getCommand(self):
+    def recvCommand(self):
         """ Retrieve data from the hardware controller
 
         Returns:
           self.__recv (str): Returns a command received from the hardware
             controller
         """
-        return self.recv()
-
-    def send(self, data):
-        print "Sent: %s" % data
-
-    def recv(self):
-        print "Recv: <create child class of HardwareController>"
         return
 
 

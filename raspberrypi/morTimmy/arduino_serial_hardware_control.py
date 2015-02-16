@@ -36,7 +36,7 @@ class ArduinoSerialController(HardwareController):
         """ Close the serial connection when the class is deleted """
         self.channel.close()
 
-    def send(self, data):
+    def sendCommand(self, command, data=''):
         """ Send data onto the serial port towards the arduino.
 
         Used by the generic HardwareController class to send
@@ -46,10 +46,10 @@ class ArduinoSerialController(HardwareController):
           data (str): The data string to send to the arduino. This
             is used by the public sendCommand() function
         """
-        print "morTimmy: %s" % data
-        self.channel.write(data)
+        print "morTimmy: %s %s" % (command, data)
+        self.channel.write(' '.join([command, data]))
 
-    def recv(self):
+    def recvCommand(self):
         """ Receive data from the Arduino through the serial port.
 
         Used by the generic HardwareController class to receive
