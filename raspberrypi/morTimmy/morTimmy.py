@@ -1,17 +1,8 @@
 #!/usr/bin/env python
 
 # imports
-from arduino_motor_driver import Motor
 from arduino_serial_hardware_control import ArduinoSerialController
 from bluetooth_remote_control import RemoteController
-
-
-# Motor ID definitions
-FRONT_LEFT_MOTOR_ID = 1
-FRONT_RIGHT_MOTOR_ID = 2
-REAR_LEFT_MOTOR_ID = 3
-REAR_RIGHT_MOTOR_ID = 4
-
 
 class Robot:
     """ Main class for controlling our robot morTimmy
@@ -29,22 +20,13 @@ class Robot:
     arduino = ArduinoSerialController()
     remoteControl = RemoteController()
 
-    def __init__(self, frontLeftMotorID, frontRightMotorID,
-                 rearLeftMotorID, rearRightMotorID):
+    def __init__(self):
         """ Called when the robot class is created.
 
         At the moment we only launch into the self.initialize()
         function
 
         Args:
-          frontLeftMotorID (int): Motor ID of the front left DC
-            motor
-          frontRightMotorID (int): Motor ID of the front right
-            DC motor
-          rearLeftMotorID (int): Motor ID of the rear left DC
-            motor
-          rearRightMotorID (int): Motor ID of the rear right
-            DC motor
 
         Returns:
           The function doesn't explicitly return anything. Python
@@ -53,11 +35,6 @@ class Robot:
         Raises:
           TODO: Add proper error handling.
         """
-        self.frontLeftMotor = Motor(frontLeftMotorID)
-        self.frontRightMotor = Motor(frontRightMotorID)
-        self.rearLeftMotor = Motor(rearLeftMotorID)
-        self.rearRightMotor = Motor(rearRightMotorID)
-
         self.initialize()
 
     def initialize(self):
@@ -88,10 +65,7 @@ def main():
     It will only contain a very limited program
     logic. The main action happens in the Robot class
     """
-    morTimmy = Robot(FRONT_LEFT_MOTOR_ID,
-                     FRONT_RIGHT_MOTOR_ID,
-                     REAR_LEFT_MOTOR_ID,
-                     REAR_RIGHT_MOTOR_ID)
+    morTimmy = Robot()
 
     try:
         while(True):

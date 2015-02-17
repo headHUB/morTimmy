@@ -21,8 +21,8 @@ class ControllerCmd:
     Raspberry Pi.
     """
 
-    int leftMotorSpeed       # Controls the speed of the left side motors
-    int rightMotorSpeed      # Controls the speed of the right side motors
+    leftMotorSpeed = 0      # Controls the speed of the left side motors
+    rightMotorSpeed = 0     # Controls the speed of the right side motors
 
     def goForward(speed):
         leftMotorSpeed = speed
@@ -44,7 +44,7 @@ class ControllerCmd:
         leftMotorSpeed = 0
         rightMotorSpeed = 0
 
-    def joystick(int x, int y):
+    def joystick(x, y):
         """ Controlling the robot using a joystick 
 
         Args:
@@ -58,13 +58,13 @@ class ControllerCmd:
 
         # Make sure the remote control x and y values
         # do not exceed the maximum speed
-        if (leftMotorSpeed < -255)
+        if (leftMotorSpeed < -255):
             leftMotorSpeed = -255;
-        else if (leftMotorSpeed > 255)
+        elif (leftMotorSpeed > 255):
             leftMotorSpeed = 255;
-        if (rightMotorSpeed < -255)
+        if (rightMotorSpeed < -255):
             rightMotorSpeed = -255;
-        else if (rightMotorSpeed > 255)
+        elif (rightMotorSpeed > 255):
             rightMotorSpeed = 255;
 
 
