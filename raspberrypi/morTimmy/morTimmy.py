@@ -4,6 +4,7 @@
 from arduino_serial_hardware_control import ArduinoSerialController
 from bluetooth_remote_control import RemoteController
 
+
 class Robot:
     """ Main class for controlling our robot morTimmy
 
