@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
-from hardware_control import HardwareController
-import serial
+import serial			# pyserial library for serial communications
+from struct import *		# Python struct library for constructing the command data
+
+# Definitions
+FRAME_FLAG 0x0C 	# Used to mark the beginning and end of a frame 
+FRAME_ESC 0x1B		# Used to mark the next byte as part of the data 
+			# instead of a control flag (e.g. FRAME_FLAG or FRAME_ESC)
 
 
-class ArduinoSerialController(HardwareController):
+class HardwareController():
 
     """ Serial interface into the Arduino microcontroller """
-
-    commands = {'goForward': 'W',
-                'goBack': 'S',
-                'goLeft': 'A',
-                'goRight': 'D'}
 
     def __init__(self, serialPort='/dev/ttyACM0',
                  baudrate=9600,
@@ -39,8 +39,7 @@ class ArduinoSerialController(HardwareController):
     def sendCommand(self, command, data=''):
         """ Send data onto the serial port towards the arduino.
 
-        Used by the generic HardwareController class to send
-        commands.
+        Used by the HardwareController class to send commands.
 
         Args:
           data (str): The data string to send to the arduino. This
@@ -52,7 +51,7 @@ class ArduinoSerialController(HardwareController):
     def recvCommand(self):
         """ Receive data from the Arduino through the serial port.
 
-        Used by the generic HardwareController class to receive
+        Used by the HardwareController class to receive
         commands from the Arduino.
 
         Returns:
@@ -73,7 +72,7 @@ def main():
     """
 
     try:
-        hwControl = ArduinoSerialController()
+        hwControl = HardwareController()
     except Exception as e:
         print ("Error, could not establish connection to "
                "Arduino through the serial port.\n%s") % e

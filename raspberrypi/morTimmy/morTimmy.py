@@ -17,7 +17,7 @@ class Robot:
                 'goLeft': 'A',
                 'goRight': 'D'}
 
-    arduino = ArduinoSerialController()
+    arduino = HardwareController()
     remoteControl = RemoteController()
 
     def __init__(self):
