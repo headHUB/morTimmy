@@ -4,26 +4,42 @@ import serial			    # pyserial library for serial communications
 import struct 	     	# Python struct library for constructing the command data
 from zlib import crc32      # used to calculate a message checksum
 from time import time
+
+
 # Definitions
 
-FRAME_FLAG = 0x0C       # Marks the beginning and end of a frame
-FRAME_ESC = 0x1B        # Escapes chars in a frame that have a special meaning
+# Frames
+FRAME_FLAG = 0x0C       # Marks the start and end of a frame
+FRAME_ESC = 0x1B        # Escape char for frame
 
-CMD_START = 0x00
-CMD_START_ACK = 0x00
-CMD_START_NACK = 0x00
-CMD_STOP = 0x00
-CMD_STOP_ACK = 0x00
-CMD_STOP_NACK = 0x00
-CMD_RESTART = 0x00
-CMD_RESTART_ACK = 0x00
-CMD_RESTART_NACK = 0x00
+# Arduino
+MODULE_ARDUINO = 0x030
+CMD_ARDUINO_START = 0x64
+CMD_ARDUINO_START_NACK = 0x65
+CMD_ARDUINO_STOP = 0x66
+CMD_ARDUINO_STOP_NACK = 0x67
+CMD_ARDUINO_RESTART = 0x68
+CMD_ARDUINO_RESTART_NACK = 0x69
 
-# Motor module specific definitions
-CMD_FORWARD = 0x00
-CMD_BACK = 0x00
-CMD_LEFT = 0x00
-CMD_RIGHT = 0x00
+# Distance Sensor
+MODULE_DISTANCE_SENSOR = 0x31
+CMD_DISTANCE_SENSOR_START = 0x64
+CMD_DISTANCE_SENSOR_NACK = 0x65
+CMD_DISTANCE_SENSOR_STOP = 0x66
+CMD_DISTANCE_SENSOR_STOP_NACK = 0x67
+
+# Motor
+MODULE_MOTOR = 0x32
+CMD_MOTOR_FORWARD = 0x64
+CMD_MOTOR_FORWARD_NACK = 0x65
+CMD_MOTOR_BACK = 0x66
+CMD_MOTOR_FORWARD_NACK = 0x67
+CMD_MOTOR_LEFT = 0x68
+CMD_MOTOR_LEFT_NACK = 0x69
+CMD_MOTOR_RIGHT = 0x6A
+CMD_MOTOR_RIGHT_NACK = 0x6B
+CMD_MOTOR_STOP = 0x6C
+CMD_MOTOR_STOP_NACK = 0x6D
 
 
 class HardwareController():
@@ -49,31 +65,23 @@ class HardwareController():
     Our message consists of the following fields:
 
     messageID      (unsigned long, 4 bytes, numeric id of the message)
-    destination    (unsigned short, 2 byte, arduino module to target)
+    acknowledgeID  (unsigned long, 4 bytes, numeric id of the messageID
+                    it replied to)
+    module         (unsigned short, 2 byte, arduino module to target)
     commandType    (unsigned short, 1 byte, Type of command to send)
     dataLen        (unsigned short, 1 byte, lenght of message data in Bytes)
     data           (string, dataLen byte(s), the data payload)
     checksum       (unsigned int, 4 bytes, CRC32)
 
-    The following generic commands are available currently:
-        START, START_ACK,
-        START_NACK:             Starts the specified module.
-                                replies ACK with messageID in data field
-                                when started, replies NACK if there was
-                                an error
-        RESTART, RESTART_ACK,
-        RESTART_NACK:           Restarts the specified module,
-                                replies ACK with messageID ind data field
-                                when restarted, replies NACK if there was
-                                an error
-        STOP, STOP_ACK,
-        STOP_NACK:              Stops the specified module, replies
-                                with STOP_ACK with messageID in data field
-                                when stopped, replies NACK if there was an
-                                error
-        DATA                    Sends data related to the specified module,
-                                an example is a Distance Sensor reporting
-                                back its values when STARTed
+    The commandType depicts the action that has to take place on the
+    specified module. If the action is succesful the other party will
+    reply with the same module and commandType. In addition it will
+    put the messageID of the original request in the acknowledgeID field.
+    If the command failed to run a NACK messaage will be send with the
+    acknowledgeID field filled in.
+
+    The data field contains data that might be returned like the distance
+    from a distance sensor.
 
     The following modules are available currently:
         Arduino                 Controls the Arduino itself
@@ -134,7 +142,7 @@ class HardwareController():
         except:
             pass
 
-    def __packMessage(self, module, commandType, data):
+    def __packMessage(self, module, commandType, data='', acknowledgeID=0):
         """ Creates a message understood by the Arduino
 
           Message structure
@@ -162,20 +170,22 @@ class HardwareController():
         # the packet checksum and repack the message
 
         checksum = 0
-        rawMessage = struct.pack('!LccHsi',
+        rawMessage = struct.pack('!LLccHsi',
                                  self.__lastMessageID,
-                                 module,
-                                 commandType,
+                                 acknowledgeID,
+                                 chr(module),
+                                 chr(commandType),
                                  len(data),
                                  data,
                                  checksum)
 
         checksum = crc32(rawMessage[-4])
 
-        rawMessage = struct.pack('!LccHsi',
+        rawMessage = struct.pack('!LLccHsi',
                                  self.__lastMessageID,
-                                 module,
-                                 commandType,
+                                 acknowledgeID,
+                                 chr(module),
+                                 chr(commandType),
                                  len(data),
                                  data,
                                  checksum)
@@ -197,12 +207,13 @@ class HardwareController():
                data
         """
 
-        (messageID, module, commandType,
-         dataLen, data, recvChecksum) = struct.unpack('!LccHsi', message)
+        (messageID, acknowledgeID, module, commandType,
+         dataLen, data, recvChecksum) = struct.unpack('!LLccHsi', message)
 
         checksum = 0
-        calcChecksum = crc32(struct.pack('!LccHsi',
+        calcChecksum = crc32(struct.pack('!LLccHsi',
                                          messageID,
+                                         acknowledgeID,
                                          module,
                                          commandType,
                                          dataLen,
@@ -210,7 +221,7 @@ class HardwareController():
                                          checksum)[-4])
 
         if recvChecksum == calcChecksum:
-            return messageID, module, commandType, dataLen, data
+            return messageID, acknowledgeID, ord(module), ord(commandType), dataLen, data
         else:
             return None     # invalid packet
 
@@ -271,7 +282,7 @@ class HardwareController():
 
         return message
 
-    def sendMessage(self, module, commandType, data):
+    def sendMessage(self, module, commandType, data, acknowledgeID=0):
         """ Send data onto the serial port towards the arduino.
 
         Used by the HardwareController class to send commands.
@@ -281,8 +292,21 @@ class HardwareController():
             is used by the public sendCommand() function
         """
 
-        print "morTimmy: %s %s %s" % (module, commandType, data)
-        self.serialPort.write(' '.join([module, commandType, data]))
+        packedMessage = self.__packMessage(module,
+                                           commandType,
+                                           data,
+                                           acknowledgeID)
+        packedFrame = self.__packFrame(packedMessage)
+
+        print ("morTimmy: "
+               "msgID=%d "
+               "ackID=%d "
+               "module=%s "
+               "cmd=%s "
+               "dataLen=%d "
+               "data=%s ") % (self.__lastMessageID, acknowledgeID, hex(module),
+                            hex(commandType), len(data), data)
+        #self.serialPort.write(packedFrame)
 
     def recvMessage(self):
         """ Receive data from the Arduino through the serial port.
@@ -319,7 +343,6 @@ class HardwareController():
         print unpackedMessage
 
 
-
 def main():
     """ This function will only be called when the library is
     run directly. Only to be used to do quick tests on the library.
@@ -332,7 +355,7 @@ def main():
                "Arduino through the serial port.\n%s") % e
 #        exit()
 
-    hwControl.testMessagePacking('a', 'b', 'c')
+    hwControl.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 'c')
 
 
 if __name__ == '__main__':
