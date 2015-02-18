@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import serial			# pyserial library for serial communications
-from struct import *		# Python struct library for constructing the command data
+import serial			    # pyserial library for serial communications
+import struct 	     	# Python struct library for constructing the command data
+from zlib import crc32      # used to calculate a message checksum
 
 # Definitions
 
@@ -33,9 +34,9 @@ class HardwareController():
     or other special characters we precede the byte with an
     escape flag (FRAME_ESC).
 
-    Since data can be lost in transmission due to hardware errors
-    or electrical interference we perform a CRC check on the raw
-    message and append that after the message.
+    Since data can be lost or mangled in transmission due to hardware
+    errors or electrical interference we perform a CRC check on the
+    raw message and append that after the message.
 
      Frame layout
     +------------+---------+-----+------------+
@@ -45,10 +46,11 @@ class HardwareController():
     Our message consists of the following fields:
 
     messageID      (unsigned long, 4 bytes, numeric id of the message)
-    destination    (unsigned int, 1 byte, arduino module to target)
-    commandType    (unsigned int, 1 byte, Type of command to send)
-    dataLen        (unsigned int, 1 byte, lenght of message data in Bytes)
+    destination    (unsigned short, 2 byte, arduino module to target)
+    commandType    (unsigned short, 1 byte, Type of command to send)
+    dataLen        (unsigned short, 1 byte, lenght of message data in Bytes)
     data           (string, dataLen byte(s), the data payload)
+    checksum       (unsigned int, 4 bytes, CRC32)
 
     The following generic commands are available currently:
         START, START_ACK:       Starts the specified module.
@@ -60,8 +62,9 @@ class HardwareController():
         STOP, STOP_ACK          Stops the specified module, replies
                                 with STOP_ACK with messageID in data field
                                 when stopped
-        REQ_DATA, DATA          Requests data from the specified module,
-                                replies with the requested data.
+        DATA                    Sends data related to the specified module,
+                                an example is a Distance Sensor reporting
+                                back its values when STARTed
 
     The following modules are available currently:
         Motors                  Controls the robots motors
@@ -72,11 +75,11 @@ class HardwareController():
 
     __lastMessageID = 0         # holds the last used messageID
 
-    def __init__(self, serialPort='/dev/ttyACM0',
-                 baudrate=9600,
-                 stopbits=serial.STOPBITS_ONE,
-                 bytesize=serial.EIGHTBITS,
-                 timeout=0):
+    def initialize(self, serialPort='/dev/ttyACM0',
+                   baudrate=9600,
+                   stopbits=serial.STOPBITS_ONE,
+                   bytesize=serial.EIGHTBITS,
+                   timeout=0):
         """ The initialisation for the ArduinoSerialController class
 
         Args:
@@ -93,20 +96,23 @@ class HardwareController():
 
     def __del__(self):
         """ Close the serial connection when the class is deleted """
-        self.serialPort.close()
+        try:
+            self.serialPort.close()
+        except:
+            pass
 
     def __packMessage(self, module, commandType, data):
         """ Creates a message understood by the Arduino
 
           Message structure
         +-----------+--------+-------------+---------+------+----------+
-        | MessageID | Module | CommandType | dataLen | Data | Checksum |
+        | messageID | module | commandType | dataLen | data | checksum |
         +-----------+--------+-------------+---------+------+----------+
 
         Args:
-            Module   (unsigned int, 1 byte, arduino module to target)
-            commandType    (unsigned int, 1 byte, Type of command to send)
-            data           (string, dataLen byte(s), the data payload)
+            module:      (unsigned int, 1 byte, arduino module to target)
+            commandType: (unsigned int, 1 byte, Type of command to send)
+            data:        (string, dataLen byte(s), the data payload)
 
         Returns:
             Message byte string
@@ -117,20 +123,63 @@ class HardwareController():
         """
 
         self.__lastMessageID += 1
-        rawMessage = self.__lastMessageID
-        rawMessage.append(module)
-        rawMessage.append(commandType)
-        rawMessage.append(len(data))
-        rawMessage.append(data)
-        rawMessage.append(data)
 
-        checksum = 'TODO'              # Need to implement CRC checksum
-        rawMessage.append(checksum)
+        # pack the message into binary format using ! for platform independency
+        # (big-endian, standard type size, no pad bytes). Then calculate
+        # the packet checksum and repack the message
+
+        checksum = 0
+        rawMessage = struct.pack('!LccHsi',
+                                 self.__lastMessageID,
+                                 module,
+                                 commandType,
+                                 len(data),
+                                 data,
+                                 checksum)
+
+        checksum = crc32(rawMessage[-4])
+
+        rawMessage = struct.pack('!LccHsi',
+                                 self.__lastMessageID,
+                                 module,
+                                 commandType,
+                                 len(data),
+                                 data,
+                                 checksum)
 
         return rawMessage
 
     def __unpackMessage(self, message):
-        pass
+        """ Unpacks a message received from the Arduino
+
+        Args:
+            message (struct): A message unpacked from a received FRAME_FLAG
+
+        Returns:
+            A dict containing:
+               messageID
+               module
+               commandType
+               dataLen
+               data
+        """
+
+        (messageID, module, commandType,
+         dataLen, data, recvChecksum) = struct.unpack('!LccHsi', message)
+
+        checksum = 0
+        calcChecksum = crc32(struct.pack('!LccHsi',
+                                         messageID,
+                                         module,
+                                         commandType,
+                                         dataLen,
+                                         data,
+                                         checksum)[-4])
+
+        if recvChecksum == calcChecksum:
+            return messageID, module, commandType, dataLen, data
+        else:
+            return None     # invalid packet
 
     def __packFrame(self, message):
         """ Packs the command into a frame
@@ -147,6 +196,20 @@ class HardwareController():
             A packed frame suitable for sending to the arduino
             over the serial connection. """
 
+        frame = b''
+        frame += chr(FRAME_FLAG)
+
+        for byte in message:
+            if (byte == chr(FRAME_ESC)) or (byte == chr(FRAME_FLAG)):
+                frame += chr(FRAME_ESC)
+                frame += byte          # TODO, Need to XOR this value?
+            else:
+                frame += byte
+
+        frame += chr(FRAME_FLAG)
+
+        return frame
+
     def __unpackFrame(self, frame):
         """ Unpacks a received frame from the arduino
 
@@ -158,6 +221,23 @@ class HardwareController():
                                       arduino
         """
 
+        nextByteValid = False
+        message = b''
+
+        if(frame[:1] != chr(FRAME_FLAG)) or (frame[-1:] != chr(FRAME_FLAG)):
+            print "Invalid frame received, frame flag not valid"
+        else:
+            for byte in frame:
+                if nextByteValid:
+                    message += byte
+                    nextByteValid = False
+                elif (byte == chr(FRAME_ESC)):
+                        nextByteValid = True
+                elif (byte != chr(FRAME_FLAG)):
+                        message += byte
+
+        return message
+
     def sendMessage(self, module, commandType, data):
         """ Send data onto the serial port towards the arduino.
 
@@ -167,8 +247,9 @@ class HardwareController():
           data (str): The data string to send to the arduino. This
             is used by the public sendCommand() function
         """
-        print "morTimmy: %s %s" % (command, data)
-        self.serialPort.write(' '.join([command, data]))
+
+        print "morTimmy: %s %s %s" % (module, commandType, data)
+        self.serialPort.write(' '.join([module, commandType, data]))
 
     def recvMessage(self):
         """ Receive data from the Arduino through the serial port.
@@ -185,6 +266,26 @@ class HardwareController():
         else:
             return None
 
+    def testMessagePacking(self, module, commandType, data):
+        """ Test for the message pack and unpack functions """
+
+        print "Packing message..."
+        packedMessage = self.__packMessage(module, commandType, data)
+        print ''.join(["\\x%02x" % ord(x) for x in packedMessage])
+
+        print "Packing message into frame..."
+        frame = self.__packFrame(packedMessage)
+        print ''.join(["\\x%02x" % ord(x) for x in frame])
+
+        print "Unpacking message from frame..."
+        unpackedFrame = self.__unpackFrame(frame)
+        print ''.join(["\\x%02x" % ord(x) for x in unpackedFrame])
+
+        print "Unpacking message..."
+        unpackedMessage = self.__unpackMessage(packedMessage)
+        print unpackedMessage
+
+
 
 def main():
     """ This function will only be called when the library is
@@ -196,10 +297,9 @@ def main():
     except Exception as e:
         print ("Error, could not establish connection to "
                "Arduino through the serial port.\n%s") % e
-        exit()
-    hwControl.sendCommand('FWD', '255')
-    hwControl.sendCommand('STOP')
-    hwControl.sendCommand('COMMAND TO LONG!')
+#        exit()
+
+    hwControl.testMessagePacking('a', 'b', 'c')
 
 
 if __name__ == '__main__':
