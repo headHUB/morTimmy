@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # imports
-from hardware_controller import HardwareController
+from hardware_controller import *
 from time import sleep
 
 
@@ -53,13 +53,9 @@ class Robot:
     def run(self):
         """ The main robot loop """
 
-        arduinoRecvCommand = self.arduino.recvCommand()
-        if arduinoRecvCommand:
-            print arduinoRecvCommand
-            if '200' in arduinoRecvCommand:
-                self.arduino.sendCommand(self.commands['goForward'])
-            else:
-                self.arduino.sendCommand(self.commands['goBack'])
+        if self.arduino.isConnected:
+            self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 'Data for my Arduino friend')
+            self.arduino.recvMessage()
 
 
 def main():

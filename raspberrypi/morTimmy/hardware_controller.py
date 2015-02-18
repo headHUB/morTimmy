@@ -3,7 +3,7 @@
 import serial			    # pyserial library for serial communications
 import struct 	     	# Python struct library for constructing the command data
 from zlib import crc32      # used to calculate a message checksum
-from time import time
+from time import sleep
 
 
 # Definitions
@@ -114,28 +114,32 @@ class HardwareController():
         """
 
         try:
+            print "Opening serial connection to arduino on port %s with baudrate %d" % (serialPort, baudrate)
             self.serialPort = serial.Serial(serialPort, baudrate)
-
+            print "Connected to Arduino"
+    
             '''  Reset the arduino by setting the DTR pin LOW and then
             HIGH again. This is the same as pressing the reset button
             on the Arduino itself. The flushInput() whilst the reset
             is in progress is to ensure there is no data from before
             the Arduino was reset in the serial buffer '''
 
+            print "Resetting Arduino using DTR pin"
             self.serialPort.setDTR(level=False)
-            time.sleep(0.5)
+            sleep(0.5)
             self.serialPort.flushInput()
             self.serialPort.setDTR()
-            time.sleep(0.5)
+            sleep(0.5)
+
+            print "TODO: implement proper handshake between Arduino and Pi to make sure it's initalised properly"
 
             ''' TODO implement a handshake between the arduino and Pi
             make sure we're not doing anything until the handshake is
             finalised. '''
 
-            self.serialPort.timeout = 5     # Set blocking read to 5 sec
-            handshake = self.serialPort.read()
-            if handshake == "OK":
-                print "Handshare succesfully"
+            self.serialPort.timeout = 0.1     # Set blocking read to 5 sec
+            handshake = self.serialPort.readline()
+            print "Recv from Arduino: %s" % handshake
             self.serialPort.timeout = 0     # set non-blocking read
             self.isConnected = True
         except OSError:
@@ -143,7 +147,7 @@ class HardwareController():
             self.isConnected = False
         except Exception, e:
             print "Unexpected error whilst connecting to Arduino"
-            print "%s" % e
+            print "Exception: %s Error: %s" % (Exception, e)
             self.isConnected = False
 
     def __del__(self):
@@ -342,6 +346,13 @@ class HardwareController():
         foundEndOfFrame = False
         foundEscFlag = False
 
+        self.serialPort.timeout=5
+        message = self.serialPort.readline()
+        if message is not None and message is not '':
+            print "TEMP READLINE UNTIL SERIAL PROTO IS CODED ON ARDUINO"
+            print "%s" % self.serialPort.readline()
+
+        '''
         while not foundEndOfFrame:
             recvByte = self.serialPort.read(1)
             if recvByte == FRAME_FLAG and not foundStartOfFrame:
@@ -369,6 +380,7 @@ class HardwareController():
 
         print "Arduino: %s" % unpackedMessage
         return unpackedMessage
+        '''
 
     def testMessagePacking(self, module, commandType, data):
         """ Test for the message pack and unpack functions """
@@ -402,6 +414,7 @@ def main():
                "Arduino through the serial port.\n%s") % e
 #        exit()
 
+    hwControl.initialize()
     hwControl.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 'c')
     hwControl.recvMessage()
 
