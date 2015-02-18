@@ -303,6 +303,10 @@ class HardwareController():
             is used by the public sendCommand() function
         """
 
+        if not self.isConnected:
+            print "sendMessage: Not connected to Arduino"
+            return None
+
         packedMessage = self.__packMessage(module,
                                            commandType,
                                            data,
@@ -316,8 +320,8 @@ class HardwareController():
                "cmd=%s "
                "dataLen=%d "
                "data=%s ") % (self.__lastMessageID, acknowledgeID, hex(module),
-                            hex(commandType), len(data), data)
-        #self.serialPort.write(packedFrame)
+                              hex(commandType), len(data), data)
+        # self.serialPort.write(packedFrame)
 
     def recvMessage(self):
         """ Receive data from the Arduino through the serial port.
@@ -326,13 +330,45 @@ class HardwareController():
         commands from the Arduino.
 
         Returns:
-          returns a single frame received through the serial controller.
+            (messageID, acknowledgeID, module, commandType, dataLen, data)
         """
-        data = self.serialPort.readline()
-        if data:
-            return data.strip()
-        else:
+
+        if not self.isConnected:
+            print "recvMessage: Not connected to Arduino"
             return None
+
+        message = b''
+        foundStartOfFrame = False
+        foundEndOfFrame = False
+        foundEscFlag = False
+
+        while not foundEndOfFrame:
+            recvByte = self.serialPort.read(1)
+            if recvByte == FRAME_FLAG and not foundStartOfFrame:
+                # Beginning of our message
+                foundStartOfFrame = True
+                message += recvByte
+            elif (foundStartOfFrame) and \
+                 (recvByte == FRAME_ESC) and not foundEscFlag:
+                # Found an escape flag which was not escaped itself
+                foundEscFlag = True
+            elif foundStartOfFrame and foundEscFlag:
+                # Byte preceded by FLAG_ESC so treat as normal data
+                foundEscFlag = False
+                message += recvByte
+            elif foundStartOfFrame and not foundEscFlag:
+                # regular data part of message
+                message += recvByte
+            elif foundStartOfFrame and recvByte == FRAME_FLAG:
+                # Found ending FRAME_FLAG
+                foundEndOfFrame = True
+                message += recvByte
+
+        unpackedFrame = self.__unpackFrame(message)
+        unpackedMessage = self.__unpackMessage(unpackedFrame)
+
+        print "Arduino: %s" % unpackedMessage
+        return unpackedMessage
 
     def testMessagePacking(self, module, commandType, data):
         """ Test for the message pack and unpack functions """
@@ -367,6 +403,7 @@ def main():
 #        exit()
 
     hwControl.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 'c')
+    hwControl.recvMessage()
 
 
 if __name__ == '__main__':
