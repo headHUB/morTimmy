@@ -3,7 +3,7 @@
 import serial			    # pyserial library for serial communications
 import struct 	     	# Python struct library for constructing the command data
 from zlib import crc32      # used to calculate a message checksum
-
+from time import time
 # Definitions
 
 FRAME_FLAG = 0x0C       # Marks the beginning and end of a frame
@@ -11,10 +11,13 @@ FRAME_ESC = 0x1B        # Escapes chars in a frame that have a special meaning
 
 CMD_START = 0x00
 CMD_START_ACK = 0x00
+CMD_START_NACK = 0x00
 CMD_STOP = 0x00
 CMD_STOP_ACK = 0x00
+CMD_STOP_NACK = 0x00
 CMD_RESTART = 0x00
 CMD_RESTART_ACK = 0x00
+CMD_RESTART_NACK = 0x00
 
 # Motor module specific definitions
 CMD_FORWARD = 0x00
@@ -53,21 +56,29 @@ class HardwareController():
     checksum       (unsigned int, 4 bytes, CRC32)
 
     The following generic commands are available currently:
-        START, START_ACK:       Starts the specified module.
+        START, START_ACK,
+        START_NACK:             Starts the specified module.
                                 replies ACK with messageID in data field
-                                when started
-        RESTART, RESTART_ACK    Restarts the specified module,
+                                when started, replies NACK if there was
+                                an error
+        RESTART, RESTART_ACK,
+        RESTART_NACK:           Restarts the specified module,
                                 replies ACK with messageID ind data field
-                                when restarted
-        STOP, STOP_ACK          Stops the specified module, replies
+                                when restarted, replies NACK if there was
+                                an error
+        STOP, STOP_ACK,
+        STOP_NACK:              Stops the specified module, replies
                                 with STOP_ACK with messageID in data field
-                                when stopped
+                                when stopped, replies NACK if there was an
+                                error
         DATA                    Sends data related to the specified module,
                                 an example is a Distance Sensor reporting
                                 back its values when STARTed
 
     The following modules are available currently:
-        Motors                  Controls the robots motors
+        Arduino                 Controls the Arduino itself
+        Motor                   Controls the robots motors
+        Servo                   Controls the Servo motors
         DistanceSensor          Handles the distance sensor
         AccelerationSensor      Handles the Acceleration sensor
         CompassSensor           Handles the Compass sensor
@@ -93,6 +104,28 @@ class HardwareController():
                            x set timeout to x seconds (float allowed)
         """
         self.serialPort = serial.Serial(serialPort, baudrate)
+
+        '''  Reset the arduino by setting the DTR pin LOW and then
+        HIGH again. This is the same as pressing the reset button
+        on the Arduino itself. The flushInput() whilst the reset
+        is in progress is to ensure there is no data from before
+        the Arduino was reset in the serial buffer '''
+
+        self.serialPort.setDTR(level=False)
+        time.sleep(0.5)
+        self.serialPort.flushInput()
+        self.serialPort.setDTR()
+        time.sleep(0.5)
+
+        ''' TODO implement a handshake between the arduino and Pi
+        make sure we're not doing anything until the handshake is
+        finalised. '''
+
+        self.serialPort.timeout = 5     # Set blocking read to 5 sec
+        handshake = self.serialPort.read()
+        if handshake == "OK":
+            print "Handshare succesfully"
+        self.serialPort.timeout = 0     # set non-blocking read
 
     def __del__(self):
         """ Close the serial connection when the class is deleted """
