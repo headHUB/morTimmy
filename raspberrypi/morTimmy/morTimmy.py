@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 # imports
-from arduino_serial_hardware_control import ArduinoSerialController
-from bluetooth_remote_control import RemoteController
+from hardware_controller import HardwareController
+from time import sleep
 
 
 class Robot:
@@ -19,7 +19,6 @@ class Robot:
                 'goRight': 'D'}
 
     arduino = HardwareController()
-    remoteControl = RemoteController()
 
     def __init__(self):
         """ Called when the robot class is created.
@@ -44,12 +43,15 @@ class Robot:
         We have this in a seperate function (opposed to __init__)
         so we can easily reinitialise the robot within our class
         """
-        pass
+        self.arduino.initialize()
+
+        while not self.arduino.isConnected:
+            print "Failed to establish connection to arduino, retrying in 5s"
+            sleep(5)                # wait 5sec before trying again
+            self.arduino.initialize()
 
     def run(self):
         """ The main robot loop """
-
-        remoteRecvCommand = self.remoteControl.recvCommand()
 
         arduinoRecvCommand = self.arduino.recvCommand()
         if arduinoRecvCommand:

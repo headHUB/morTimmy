@@ -93,6 +93,7 @@ class HardwareController():
     """
 
     __lastMessageID = 0         # holds the last used messageID
+    isConnected = False
 
     def initialize(self, serialPort='/dev/ttyACM0',
                    baudrate=9600,
@@ -111,29 +112,39 @@ class HardwareController():
                            0 non blocking
                            x set timeout to x seconds (float allowed)
         """
-        self.serialPort = serial.Serial(serialPort, baudrate)
 
-        '''  Reset the arduino by setting the DTR pin LOW and then
-        HIGH again. This is the same as pressing the reset button
-        on the Arduino itself. The flushInput() whilst the reset
-        is in progress is to ensure there is no data from before
-        the Arduino was reset in the serial buffer '''
+        try:
+            self.serialPort = serial.Serial(serialPort, baudrate)
 
-        self.serialPort.setDTR(level=False)
-        time.sleep(0.5)
-        self.serialPort.flushInput()
-        self.serialPort.setDTR()
-        time.sleep(0.5)
+            '''  Reset the arduino by setting the DTR pin LOW and then
+            HIGH again. This is the same as pressing the reset button
+            on the Arduino itself. The flushInput() whilst the reset
+            is in progress is to ensure there is no data from before
+            the Arduino was reset in the serial buffer '''
 
-        ''' TODO implement a handshake between the arduino and Pi
-        make sure we're not doing anything until the handshake is
-        finalised. '''
+            self.serialPort.setDTR(level=False)
+            time.sleep(0.5)
+            self.serialPort.flushInput()
+            self.serialPort.setDTR()
+            time.sleep(0.5)
 
-        self.serialPort.timeout = 5     # Set blocking read to 5 sec
-        handshake = self.serialPort.read()
-        if handshake == "OK":
-            print "Handshare succesfully"
-        self.serialPort.timeout = 0     # set non-blocking read
+            ''' TODO implement a handshake between the arduino and Pi
+            make sure we're not doing anything until the handshake is
+            finalised. '''
+
+            self.serialPort.timeout = 5     # Set blocking read to 5 sec
+            handshake = self.serialPort.read()
+            if handshake == "OK":
+                print "Handshare succesfully"
+            self.serialPort.timeout = 0     # set non-blocking read
+            self.isConnected = True
+        except OSError:
+            print "Failed to connect to Arduino on serial port %s" % serialPort
+            self.isConnected = False
+        except Exception, e:
+            print "Unexpected error whilst connecting to Arduino"
+            print "%s" % e
+            self.isConnected = False
 
     def __del__(self):
         """ Close the serial connection when the class is deleted """

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import remote_control         # Controller driver and command classes
-import pybluez                  # Bluetooth python libary
+import pybluez                # Bluetooth python libary
 
 
 class RemoteController(ControllerDriver):
