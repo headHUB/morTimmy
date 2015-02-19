@@ -5,6 +5,7 @@ from hardware_controller import *
 from time import sleep
 import Queue
 
+
 class Robot:
     """ Main class for controlling our robot morTimmy
 
@@ -49,16 +50,45 @@ class Robot:
 
         self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD,
                                  'Data for my Arduino friend')
+
+        # Process all received messages in the queue
         while not self.arduino.recvMessageQueue.empty():
             recvMessage = self.recvMessageQueue.get_nowait()
 
-            if recvMessage['module'] == MODULE_DISTANCE_SENSOR:
+            if recvMessage == 'Invalid':
+                print "LOG: received invalid packet, ignoring"
+                pass
+            elif recvMessage['module'] == MODULE_DISTANCE_SENSOR:
                 self.sensorDataQueue.put(recvMessage['data'])
-            elif (recvMessage['module'] == MODULE_ARDUINO and
-                  recvMessage['commandType'] == CMD_ARDUINO_STOP_ACK):
-                print "Arduino stopped succesfully"
-
-
+            elif recvMessage['module'] == MODULE_ARDUINO:
+                if recvMessage['commandType'] == CMD_ARDUINO_START:
+                    print ("Arduino started succesfully. "
+                           "ackID %d") % recvMessage['acknowledgeID']
+                elif recvMessage['commandType'] == CMD_ARDUINO_STOP:
+                    print ("Arduino stopped succesfully. "
+                           "ackID %d") % recvMessage['acknowledgeID']
+                elif recvMessage['commandType'] == CMD_ARDUINO_RESTART:
+                    print ("Arduino restarted succesfully. "
+                           "ackID %d") % recvMessage['acknowledgeID']
+                else:
+                    print "Unknown %d cmd %d" % (recvMessage['module'],
+                                                 recvMessage['commandType'])
+            elif recvMessage['module'] == MODULE_MOTOR:
+                if recvMessage['commandType'] == CMD_MOTOR_FORWARD:
+                    print ("Motor moving forward. "
+                           "ackID %d") % recvMessage['acknowledgeID']
+                elif recvMessage['commandType'] == CMD_MOTOR_BACK:
+                    print ("Motor moving backwards. "
+                           "ackID %d") % recvMessage['acknowledgeID']
+                elif recvMessage['commandType'] == CMD_MOTOR_LEFT:
+                    print ("Motor moving left. "
+                           "ackID %d") % recvMessage['acknowledgeID']
+                elif recvMessage['commandType'] == CMD_MOTOR_RIGHT:
+                    print ("Motor moving right. "
+                           "ackID %d") % recvMessage['acknowledgeID']
+                else:
+                    print "Unknown %d cmd %d" % (recvMessage['module'],
+                                                 recvMessage['commandType'])
 
 
 def main():
