@@ -70,8 +70,7 @@ class HardwareController():
                     it replied to)
     module         (unsigned short, 2 byte, arduino module to target)
     commandType    (unsigned short, 1 byte, Type of command to send)
-    dataLen        (unsigned short, 1 byte, lenght of message data in Bytes)
-    data           (string, dataLen byte(s), the data payload)
+    data           (unsigned int, 4 bytes, the data e.g. distance )
     checksum       (unsigned int, 4 bytes, CRC32)
 
     The commandType depicts the action that has to take place on the
@@ -178,9 +177,9 @@ class HardwareController():
         +-----------+--------+-------------+---------+------+----------+
 
         Args:
-            module:      (unsigned int, 1 byte, arduino module to target)
-            commandType: (unsigned int, 1 byte, Type of command to send)
-            data:        (string, dataLen byte(s), the data payload)
+            module:      (unsigned short, 1 byte, arduino module to target)
+            commandType: (unsigned short, 1 byte, Type of command to send)
+            data:        (unsigned int, 4 bytes, the data payload)
 
         Returns:
             Message byte string
@@ -197,23 +196,21 @@ class HardwareController():
         # the packet checksum and repack the message
 
         checksum = 0
-        rawMessage = struct.pack('!LLccHsi',
+        rawMessage = struct.pack('!LLccii',
                                  self.__lastMessageID,
                                  acknowledgeID,
                                  chr(module),
                                  chr(commandType),
-                                 len(data),
                                  data,
                                  checksum)
 
         checksum = crc32(rawMessage[-4])
 
-        rawMessage = struct.pack('!LLccHsi',
+        rawMessage = struct.pack('!LLccii',
                                  self.__lastMessageID,
                                  acknowledgeID,
                                  chr(module),
                                  chr(commandType),
-                                 len(data),
                                  data,
                                  checksum)
 
@@ -235,15 +232,14 @@ class HardwareController():
         """
 
         (messageID, acknowledgeID, module, commandType,
-         dataLen, data, recvChecksum) = struct.unpack('!LLccHsi', message)
+         dataLen, data, recvChecksum) = struct.unpack('!LLccii', message)
 
         checksum = 0
-        calcChecksum = crc32(struct.pack('!LLccHsi',
+        calcChecksum = crc32(struct.pack('!LLccii',
                                          messageID,
                                          acknowledgeID,
                                          module,
                                          commandType,
-                                         dataLen,
                                          data,
                                          checksum)[-4])
 
@@ -252,7 +248,6 @@ class HardwareController():
                      'acknowledgeID': acknowledgeID,
                      'module': ord(module),
                      'commandType': ord(commandType),
-                     'dataLen': dataLen,
                      'data': data})
         else:
             self.responseQueue.put("Invalid")
@@ -341,7 +336,6 @@ class HardwareController():
                "ackID=%d "
                "module=%s "
                "cmd=%s "
-               "dataLen=%d "
                "data=%s ") % (self.__lastMessageID, acknowledgeID, hex(module),
                               hex(commandType), len(data), data)
         # self.serialPort.write(packedFrame)

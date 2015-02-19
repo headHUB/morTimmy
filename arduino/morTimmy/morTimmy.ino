@@ -11,7 +11,7 @@
 #include <NewPing.h>
 #include "newping_distance_sensor.h"
 #include <Servo.h>
-#include "raspberry_remote_control.h"
+#include "raspberry_control.h"
 
 #define RUN_TIME 30
 
@@ -68,7 +68,7 @@ namespace morTimmy {
                   distanceSensor(DISTANCE_SENSOR_TRIG_PIN,
                                  DISTANCE_SENSOR_ECHO_PIN,
                                  MAX_DISTANCE),
-                  remoteControl()     
+                  raspberry()     
             {
             }
 
@@ -84,7 +84,6 @@ namespace morTimmy {
                 state = stateRemote;
             }
 
-
             /*
              * @brief Update the state of the robot based on input from sensor and/or remote control.
              * Must be called repeatedly while the robot is in operation.
@@ -93,53 +92,20 @@ namespace morTimmy {
               unsigned long currentTime = millis();
               //int distance = distanceAverage.add(distanceSensor.getDistance());
               int distance = distanceSensor.getDistance();
-              RemoteControlDriver::command_t remoteCmd;
-              bool haveRemoteCmd = remoteControl.getRemoteCommand(remoteCmd);
-              //log("state: %d, currentTime: %lu, distance: %u remote: (%d,l:%d,r:%d,k:%d)\n", 
-           //   state, currentTime, distance, 
-          //    haveRemoteCmd, remoteCmd.left, remoteCmd.right, remoteCmd.key);
 
+              message_t msg;              
+              msg.module = MODULE_DISTANCE_SENSOR;
+              msg.commandType = CMD_ARDUINO_START;
+              msg.data = distance;
+              msg.checksum = 0;
+              
+              raspberry.sendMessage(msg);
               if (remoteControlled()) {
                 // send the current distance to the raspberry
-                Serial.print("distance: ");
-                Serial.println(distance);
-                
-                // Check if we received a command
-                if (haveRemoteCmd) {
-                  switch (remoteCmd.key) {
-                    case RemoteControlDriver::command_t::keyF1:
-                      // start "roomba" mode
-                      move();
-                      break;
-                  case RemoteControlDriver::command_t::keyNone:
-                      // this is a directional command
-                      Serial.println("received direction");
-                      leftMotors.setSpeed(remoteCmd.left);
-                      rightMotors.setSpeed(remoteCmd.right);
-                      break;
-                  default:
-                      break;
-                  }
+                //Serial.print("distance: ");
+                //Serial.println(distance);
+                            
                 }
-              }
-              else {
-                // "roomba" mode
-                if (haveRemoteCmd && remoteCmd.key == RemoteControlDriver::command_t::keyF1) {
-                  remote();
-                }
-                else {
-                  if (moving()) {
-                    if (obstacleAhead(distance)) {
-                        turn(currentTime);
-                    }
-                  }
-                  else if (turning()) {
-                    if (doneTurning(currentTime, distance)) {
-                      move();
-                    }
-                  }
-                }
-              }
             }
             
             /**
@@ -227,7 +193,7 @@ namespace morTimmy {
             enum state_t { stateStopped, stateMoving, stateTurning, stateRemote };    // Various robot states
             state_t state;                                  // Holds the current robot state
             unsigned long stateStartTime;                   // Holds the start time of the current state
-            RemoteControl remoteControl;                    // Holds the raspberry remote control class 
+            RaspberryController raspberry;                    // Holds the raspberry remote control class 
     };
 };
 
