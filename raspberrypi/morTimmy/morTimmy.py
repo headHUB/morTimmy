@@ -3,7 +3,7 @@
 # imports
 from hardware_controller import *
 from time import sleep
-
+import Queue
 
 class Robot:
     """ Main class for controlling our robot morTimmy
@@ -26,6 +26,8 @@ class Robot:
         Raises:
           TODO: Add proper error handling.
         """
+
+        self.sensorDataQueue = Queue.Queue()
         self.initialize()
 
     def initialize(self):
@@ -34,21 +36,29 @@ class Robot:
         Responsible for setting up the connection to the Arduino.
         The function loops until a connection is established
         """
-        self.arduino.initialize()
+        while not self.arduino.isConnected:
+            print ("Failed to establish connection to Arduino, retrying in 5s")
+            sleep(5)                # wait 5sec before trying again
+            self.arduino.initialize()
 
     def run(self):
         """ The main robot loop """
 
-        if self.arduino.isConnected:
-            self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD,
-                                     'Data for my Arduino friend')
-            self.arduino.recvMessage()
-        else:
-            while not self.arduino.isConnected:
-                print ("Failed to establish connection to Arduino, "
-                       "retrying in 5s")
-                sleep(5)                # wait 5sec before trying again
-                self.arduino.initialize()
+        if not self.arduino.isConnected:
+            self.arduino.initialize()
+
+        self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD,
+                                 'Data for my Arduino friend')
+        while not self.arduino.recvMessageQueue.empty():
+            recvMessage = self.recvMessageQueue.get_nowait()
+
+            if recvMessage['module'] == MODULE_DISTANCE_SENSOR:
+                self.sensorDataQueue.put(recvMessage['data'])
+            elif (recvMessage['module'] == MODULE_ARDUINO and
+                  recvMessage['commandType'] == CMD_ARDUINO_STOP_ACK):
+                print "Arduino stopped succesfully"
+
+
 
 
 def main():

@@ -2,7 +2,6 @@
 
 import serial			    # pyserial library for serial communications
 import struct 	         	# Python struct library for constructing the message
-import threading
 import Queue
 from zlib import crc32      # used to calculate a message checksum
 from time import sleep
@@ -103,6 +102,8 @@ class HardwareController():
         TODO: Implement threading/queuing for the serial
         read process
         """
+
+        self.recvMessageQueue = Queue.Queue()
 
     def initialize(self, serialPort='/dev/ttyACM0',
                    baudrate=9600,
@@ -247,13 +248,14 @@ class HardwareController():
                                          checksum)[-4])
 
         if recvChecksum == calcChecksum:
-            return (messageID,
-                    acknowledgeID,
-                    ord(module),
-                    ord(commandType),
-                    dataLen,
-                    data)
+            return ({'messageID': messageID,
+                     'acknowledgeID': acknowledgeID,
+                     'module': ord(module),
+                     'commandType': ord(commandType),
+                     'dataLen': dataLen,
+                     'data': data})
         else:
+            self.responseQueue.put("Invalid")
             return None     # invalid packet
 
     def __packFrame(self, message):
@@ -301,6 +303,7 @@ class HardwareController():
 
         if(frame[:1] != chr(FRAME_FLAG)) or (frame[-1:] != chr(FRAME_FLAG)):
             print "Invalid frame received, frame flag not valid"
+            self.recvMessageQueue.put("Invalid")
         else:
             for byte in frame:
                 if nextByteValid:
@@ -366,7 +369,8 @@ class HardwareController():
         message = self.serialPort.readline()
         if message is not None and message is not '':
             print "TEMP READLINE UNTIL SERIAL PROTO IS CODED ON ARDUINO"
-            print "%s" % self.serialPort.readline()
+            print "%s" % message
+            self.recvMessageQueue.put(message)
 
         '''
         while not foundEndOfFrame:
@@ -395,7 +399,7 @@ class HardwareController():
         unpackedMessage = self.__unpackMessage(unpackedFrame)
 
         print "Arduino: %s" % unpackedMessage
-        return unpackedMessage
+        self.recvMessageQueue.put(unpackedMessage)
         '''
 
     def testMessagePacking(self, module, commandType, data):
