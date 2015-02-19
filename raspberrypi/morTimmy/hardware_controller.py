@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import serial			    # pyserial library for serial communications
-import struct 	     	# Python struct library for constructing the command data
+import struct 	         	# Python struct library for constructing the message
+import threading
+import Queue
 from zlib import crc32      # used to calculate a message checksum
 from time import sleep
 
@@ -95,6 +97,13 @@ class HardwareController():
     __lastMessageID = 0         # holds the last used messageID
     isConnected = False
 
+    def __init__(self):
+        """ Initializes the HardwareController
+
+        TODO: Implement threading/queuing for the serial
+        read process
+        """
+
     def initialize(self, serialPort='/dev/ttyACM0',
                    baudrate=9600,
                    stopbits=serial.STOPBITS_ONE,
@@ -114,10 +123,11 @@ class HardwareController():
         """
 
         try:
-            print "Opening serial connection to arduino on port %s with baudrate %d" % (serialPort, baudrate)
+            print ("Opening serial connection to arduino on"
+                   "port %s with baudrate %d") % (serialPort, baudrate)
             self.serialPort = serial.Serial(serialPort, baudrate)
             print "Connected to Arduino"
-    
+
             '''  Reset the arduino by setting the DTR pin LOW and then
             HIGH again. This is the same as pressing the reset button
             on the Arduino itself. The flushInput() whilst the reset
@@ -131,7 +141,8 @@ class HardwareController():
             self.serialPort.setDTR()
             sleep(0.5)
 
-            print "TODO: implement proper handshake between Arduino and Pi to make sure it's initalised properly"
+            print ("TODO: implement proper handshake between Arduino "
+                   "and Pi to make sure it's initalised properly")
 
             ''' TODO implement a handshake between the arduino and Pi
             make sure we're not doing anything until the handshake is
@@ -236,7 +247,12 @@ class HardwareController():
                                          checksum)[-4])
 
         if recvChecksum == calcChecksum:
-            return messageID, acknowledgeID, ord(module), ord(commandType), dataLen, data
+            return (messageID,
+                    acknowledgeID,
+                    ord(module),
+                    ord(commandType),
+                    dataLen,
+                    data)
         else:
             return None     # invalid packet
 
@@ -346,7 +362,7 @@ class HardwareController():
         foundEndOfFrame = False
         foundEscFlag = False
 
-        self.serialPort.timeout=5
+        self.serialPort.timeout = 5
         message = self.serialPort.readline()
         if message is not None and message is not '':
             print "TEMP READLINE UNTIL SERIAL PROTO IS CODED ON ARDUINO"
@@ -408,15 +424,15 @@ def main():
     """
 
     try:
-        hwControl = HardwareController()
+        arduino = HardwareController()
     except Exception as e:
         print ("Error, could not establish connection to "
                "Arduino through the serial port.\n%s") % e
 #        exit()
 
-    hwControl.initialize()
-    hwControl.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 'c')
-    hwControl.recvMessage()
+    arduino.initialize()
+    arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 'c')
+    arduino.recvMessage()
 
 
 if __name__ == '__main__':

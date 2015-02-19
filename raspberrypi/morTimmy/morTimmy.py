@@ -13,24 +13,15 @@ class Robot:
     an interface to the DC motors and various sensors
     """
 
-    commands = {'goForward': 'W',
-                'goBack': 'S',
-                'goLeft': 'A',
-                'goRight': 'D'}
-
     arduino = HardwareController()
 
     def __init__(self):
         """ Called when the robot class is created.
 
         At the moment we only launch into the self.initialize()
-        function
-
-        Args:
+        function.
 
         Returns:
-          The function doesn't explicitly return anything. Python
-          defaults to return None in this case
 
         Raises:
           TODO: Add proper error handling.
@@ -40,22 +31,24 @@ class Robot:
     def initialize(self):
         """ (re)initializes the robot.
 
-        We have this in a seperate function (opposed to __init__)
-        so we can easily reinitialise the robot within our class
+        Responsible for setting up the connection to the Arduino.
+        The function loops until a connection is established
         """
         self.arduino.initialize()
-
-        while not self.arduino.isConnected:
-            print "Failed to establish connection to arduino, retrying in 5s"
-            sleep(5)                # wait 5sec before trying again
-            self.arduino.initialize()
 
     def run(self):
         """ The main robot loop """
 
         if self.arduino.isConnected:
-            self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 'Data for my Arduino friend')
+            self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD,
+                                     'Data for my Arduino friend')
             self.arduino.recvMessage()
+        else:
+            while not self.arduino.isConnected:
+                print ("Failed to establish connection to Arduino, "
+                       "retrying in 5s")
+                sleep(5)                # wait 5sec before trying again
+                self.arduino.initialize()
 
 
 def main():
