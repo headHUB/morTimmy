@@ -15,6 +15,9 @@ class Robot:
     """
 
     arduino = HardwareController()
+    runningTime = 0
+    isRunning = False
+    isStopped = True
 
     def __init__(self):
         """ Called when the robot class is created.
@@ -45,11 +48,23 @@ class Robot:
     def run(self):
         """ The main robot loop """
 
+        currentTime = time.time()
+        deltaTime = self.runningTime - currentTime
+
+        # Check connection to arduino, reinitialize if not
         if not self.arduino.isConnected:
             self.arduino.initialize()
 
-        self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD,
-                                 'Data for my Arduino friend')
+        # Move robot forward if stopped for 5sec
+        if self.isStopped and deltaTime >= 5:
+            self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, '255')
+            self.runningTime = currentTime
+            self.isRunning = True
+        # Stop robot if running for 5sec
+        elif self.isRunning and deltaTime >= 5:
+            self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_STOP)
+            self.runningTime = currentTime
+            self.isStopped = True
 
         # Process all received messages in the queue
         while not self.arduino.recvMessageQueue.empty():
@@ -60,32 +75,18 @@ class Robot:
                 pass
             elif recvMessage['module'] == MODULE_DISTANCE_SENSOR:
                 self.sensorDataQueue.put(recvMessage['data'])
-            elif recvMessage['module'] == MODULE_ARDUINO:
-                if recvMessage['commandType'] == CMD_ARDUINO_START:
-                    print ("Arduino started succesfully. "
-                           "ackID %d") % recvMessage['acknowledgeID']
-                elif recvMessage['commandType'] == CMD_ARDUINO_STOP:
-                    print ("Arduino stopped succesfully. "
-                           "ackID %d") % recvMessage['acknowledgeID']
-                elif recvMessage['commandType'] == CMD_ARDUINO_RESTART:
-                    print ("Arduino restarted succesfully. "
-                           "ackID %d") % recvMessage['acknowledgeID']
-                else:
-                    print "Unknown %d cmd %d" % (recvMessage['module'],
-                                                 recvMessage['commandType'])
             elif recvMessage['module'] == MODULE_MOTOR:
-                if recvMessage['commandType'] == CMD_MOTOR_FORWARD:
-                    print ("Motor moving forward. "
-                           "ackID %d") % recvMessage['acknowledgeID']
-                elif recvMessage['commandType'] == CMD_MOTOR_BACK:
-                    print ("Motor moving backwards. "
-                           "ackID %d") % recvMessage['acknowledgeID']
-                elif recvMessage['commandType'] == CMD_MOTOR_LEFT:
-                    print ("Motor moving left. "
-                           "ackID %d") % recvMessage['acknowledgeID']
-                elif recvMessage['commandType'] == CMD_MOTOR_RIGHT:
-                    print ("Motor moving right. "
-                           "ackID %d") % recvMessage['acknowledgeID']
+                if recvMessage['commandType'] == CMD_MOTOR_FORWARD_NACK:
+                    print ("Error moving forward, resending command")
+                    self.arduino.sendMessage(MODULE_MOTOR,
+                                             CMD_MOTOR_FORWARD,
+                                             '255')
+                elif recvMessage['commandType'] == CMD_MOTOR_BACK_NACK:
+                    pass
+                elif recvMessage['commandType'] == CMD_MOTOR_LEFT_NACK:
+                    pass
+                elif recvMessage['commandType'] == CMD_MOTOR_RIGHT_NACK:
+                    pass
                 else:
                     print "Unknown %d cmd %d" % (recvMessage['module'],
                                                  recvMessage['commandType'])
