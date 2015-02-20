@@ -172,9 +172,9 @@ class HardwareController():
         """ Creates a message understood by the Arduino
 
           Message structure
-        +-----------+--------+-------------+---------+------+----------+
-        | messageID | module | commandType | dataLen | data | checksum |
-        +-----------+--------+-------------+---------+------+----------+
+        +-----------+--------+-------------+-------+----------+
+        | messageID | module | commandType |  data | checksum |
+        +-----------+--------+-------------+-------+----------+
 
         Args:
             module:      (unsigned short, 1 byte, arduino module to target)
@@ -227,12 +227,11 @@ class HardwareController():
                messageID
                module
                commandType
-               dataLen
                data
         """
 
         (messageID, acknowledgeID, module, commandType,
-         dataLen, data, recvChecksum) = struct.unpack('!LLccii', message)
+         data, recvChecksum) = struct.unpack('!LLccii', message)
 
         checksum = 0
         calcChecksum = crc32(struct.pack('!LLccii',
@@ -347,7 +346,7 @@ class HardwareController():
         commands from the Arduino.
 
         Returns:
-            (messageID, acknowledgeID, module, commandType, dataLen, data)
+            (messageID, acknowledgeID, module, commandType, data)
         """
 
         if not self.isConnected:
