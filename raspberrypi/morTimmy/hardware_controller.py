@@ -205,7 +205,7 @@ class HardwareController():
                                  data,
                                  checksum)
 
-        checksum = crc32(rawMessage[-4])
+        checksum = crc32(rawMessage[:-4]) & 0xffffffff
 
         rawMessage = struct.pack('<LLBBLL',
                                  self.__lastMessageID,
@@ -233,23 +233,18 @@ class HardwareController():
         try:
             (messageID, acknowledgeID, module, commandType,
             data, recvChecksum) = struct.unpack('<LLBBLL', message)
-
-            checksum = 0
-            calcChecksum = crc32(struct.pack('<LLBBLL',
-                                             messageID,
-                                             acknowledgeID,
-                                             module,
-                                             commandType,
-                                             data,
-                                             checksum)[-4])
-
+    
+            calcChecksum = crc32(message[:-4])
+            print "calc: %s" % hex(calcChecksum)
+            print "recv: %s" % hex(recvChecksum)
             print "HIT, change != into == here when you've fixed the crc32 checking on arduino"
             if recvChecksum != calcChecksum:
                 self.recvMessageQueue.put({'messageID': messageID,
                                            'acknowledgeID': acknowledgeID,
                                            'module': module,
                                            'commandType': commandType,
-                                           'data': data})
+                                           'data': data,
+                                           'checksum': recvChecksum})
             else:
                 self.recvMessageQueue.put("Invalid")
         except Exception, e:
@@ -349,7 +344,7 @@ class HardwareController():
         commands from the Arduino.
 
         Returns:
-            (messageID, acknowledgeID, module, commandType, data)
+            (messageID, acknowledgeID, module, commandType, data, checksum)
         """
 
         if not self.isConnected:
