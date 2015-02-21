@@ -3,6 +3,8 @@
   * @brief Raspberry Controller definition for the morTimmy robot
   * @author Mathijs Mortimer
   */
+  
+#include "crc32.h"
  
 namespace morTimmy {
 
@@ -43,11 +45,10 @@ namespace morTimmy {
   struct message_t {
         unsigned long messageID;
         unsigned long acknowledgeID;
-        unsigned short module;
-        unsigned short commandType;
-        unsigned short dataLen;
-        unsigned int data;
-        unsigned int checksum;
+        byte module;        // 2 bytes, corresponds to unsigned short on Pi
+        byte commandType;
+        unsigned long data;        // 4 bytes, corresponds to unsigned int on Pi
+        unsigned long checksum;
   };   
 
   class RaspberryController {
@@ -70,31 +71,71 @@ namespace morTimmy {
         // Set the messageID
         lastMessageID++;
         msg.messageID = lastMessageID;
+        msg.checksum = 0;
         
-        // Copy the message into a byte string
+        // Copy the message minus the checksum into a byte string
+        // Then perform the checksum on the message and copy
+        // the full msg into byteMsg
+        char byteMsgForCrc32[sizeof(msg)-4];
+        memcpy(byteMsgForCrc32, &msg, sizeof(msg)-4);
+        msg.checksum = crc_string(byteMsgForCrc32);
+        
         char byteMsg[sizeof(msg)];
         memcpy(byteMsg, &msg, sizeof(msg));
         
-        // Create another instance of the message to iterate through
-        // if we find a character we need to escape (like the FRAME_FLAG)
-        // we append a FRAME_ESC character before it in the byteMsg
-        char tmpByteMsg[sizeof(msg)];
-        memcpy(tmpByteMsg, &byteMsg, sizeof(msg));
-        
-        for (int i = 0; i < sizeof(tmpByteMsg); i++) {
-          if (tmpByteMsg[i] == FRAME_FLAG || tmpByteMsg[i] == FRAME_ESC) {
-            memmove(byteMsg + i + 1,
-                    byteMsg + i,
-                    sizeof(byteMsg) - (i + 1));
-            byteMsg[i] = FRAME_ESC;
+        // First we iterate through the message to see if
+        // there are any special chars that need escaping
+        int msgSizeIncrease = 0;
+        for (int i = 0; i < sizeof(byteMsg); i++) {
+          if (byteMsg[i] == FRAME_FLAG || byteMsg[i] == FRAME_ESC) {
+            msgSizeIncrease++;
           }
         }
         
+        // If we have found special chars we create a new temp.
+        // byteMsg string with the appropriate size which
+        // we'll append FLAG_ESC to on the appropriate places
+        if (msgSizeIncrease > 0) {
+
+          char tmpByteMsg[sizeof(msg)+msgSizeIncrease];
+          memcpy(tmpByteMsg, &byteMsg, sizeof(msg));
+        
+          int bytesAdded = 0;  // keeps track of how many bytes we've added to offset the memmove
+          for (int i = 0; i < sizeof(byteMsg); i++) {
+            if (byteMsg[i] == FRAME_FLAG || byteMsg[i] == FRAME_ESC) {
+              memmove(tmpByteMsg +i + 1,
+                      tmpByteMsg + i + bytesAdded,
+                      sizeof(tmpByteMsg) - (i + 1));
+              tmpByteMsg[i] = FRAME_ESC;
+              bytesAdded++;
+             }
+          }
+          Serial.write(FRAME_FLAG);
+          Serial.write(tmpByteMsg, sizeof(tmpByteMsg));
+          Serial.write(FRAME_FLAG);
+        } else {
+
         // Print the packet bytes to the serial port including
         // the FRAME_FLAG to the start and end of the message
         Serial.write(FRAME_FLAG);
         Serial.write(byteMsg, sizeof(byteMsg));
         Serial.write(FRAME_FLAG);
+    
+          /** Uncomment the following section if you want to 'pretty print' 
+          the packets into HEX on the serial port
+    
+          Serial.print("0x");
+          Serial.print(FRAME_FLAG, HEX);
+          Serial.print(" ");
+          for (int i = 0; i < sizeof(byteMsg); i++) {
+            Serial.print("0x"); 
+            Serial.print(byteMsg[i], HEX);
+            Serial.print(" ");
+          }
+          Serial.print(FRAME_FLAG, HEX);
+          Serial.println();
+          */
+        } 
       }      
   };
 };
