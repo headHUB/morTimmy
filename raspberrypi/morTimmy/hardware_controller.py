@@ -69,9 +69,9 @@ class HardwareController():
     acknowledgeID  (unsigned long, 4 bytes, numeric id of the messageID
                     it replied to)
     module         (unsigned short, 2 byte, arduino module to target)
-    commandType    (unsigned short, 1 byte, Type of command to send)
-    data           (unsigned int, 4 bytes, the data e.g. distance )
-    checksum       (unsigned int, 4 bytes, CRC32)
+    commandType    (unsigned short, 2 byte, Type of command to send)
+    data           (unsigned long, 4 bytes, the data e.g. distance )
+    checksum       (unsigned long, 4 bytes, CRC32)
 
     The commandType depicts the action that has to take place on the
     specified module. If the action is succesful the other party will
@@ -147,11 +147,12 @@ class HardwareController():
             ''' TODO implement a handshake between the arduino and Pi
             make sure we're not doing anything until the handshake is
             finalised. '''
-
+            '''
             self.serialPort.timeout = 0.1     # Set blocking read to 5 sec
             handshake = self.serialPort.readline()
             print "Recv from Arduino: %s" % handshake
             self.serialPort.timeout = 0     # set non-blocking read
+            '''
             self.isConnected = True
         except OSError:
             print "Failed to connect to Arduino on serial port %s" % serialPort
@@ -196,7 +197,7 @@ class HardwareController():
         # the packet checksum and repack the message
 
         checksum = 0
-        rawMessage = struct.pack('!LLccii',
+        rawMessage = struct.pack('<LLBBLL',
                                  self.__lastMessageID,
                                  acknowledgeID,
                                  chr(module),
@@ -206,7 +207,7 @@ class HardwareController():
 
         checksum = crc32(rawMessage[-4])
 
-        rawMessage = struct.pack('!LLccii',
+        rawMessage = struct.pack('<LLBBLL',
                                  self.__lastMessageID,
                                  acknowledgeID,
                                  chr(module),
@@ -220,7 +221,7 @@ class HardwareController():
         """ Unpacks a message received from the Arduino
 
         Args:
-            message (struct): A message unpacked from a received FRAME_FLAG
+            message (struct): A message unpacked from a frame
 
         Returns:
             A dict containing:
@@ -229,28 +230,30 @@ class HardwareController():
                commandType
                data
         """
+        try:
+            (messageID, acknowledgeID, module, commandType,
+            data, recvChecksum) = struct.unpack('<LLBBLL', message)
 
-        (messageID, acknowledgeID, module, commandType,
-         data, recvChecksum) = struct.unpack('!LLccii', message)
+            checksum = 0
+            calcChecksum = crc32(struct.pack('<LLBBLL',
+                                             messageID,
+                                             acknowledgeID,
+                                             module,
+                                             commandType,
+                                             data,
+                                             checksum)[-4])
 
-        checksum = 0
-        calcChecksum = crc32(struct.pack('!LLccii',
-                                         messageID,
-                                         acknowledgeID,
-                                         module,
-                                         commandType,
-                                         data,
-                                         checksum)[-4])
-
-        if recvChecksum == calcChecksum:
-            return ({'messageID': messageID,
-                     'acknowledgeID': acknowledgeID,
-                     'module': ord(module),
-                     'commandType': ord(commandType),
-                     'data': data})
-        else:
-            self.responseQueue.put("Invalid")
-            return None     # invalid packet
+            print "HIT, change != into == here when you've fixed the crc32 checking on arduino"
+            if recvChecksum != calcChecksum:
+                self.recvMessageQueue.put({'messageID': messageID,
+                                           'acknowledgeID': acknowledgeID,
+                                           'module': module,
+                                           'commandType': commandType,
+                                           'data': data})
+            else:
+                self.recvMessageQueue.put("Invalid")
+        except Exception, e:
+                self.recvMessageQueue.put("Invalid %s" % e)
 
     def __packFrame(self, message):
         """ Packs the command into a frame
@@ -358,42 +361,42 @@ class HardwareController():
         foundEndOfFrame = False
         foundEscFlag = False
 
+        '''
         self.serialPort.timeout = 5
         message = self.serialPort.readline()
         if message is not None and message is not '':
             print "TEMP READLINE UNTIL SERIAL PROTO IS CODED ON ARDUINO"
             print "%s" % message
             self.recvMessageQueue.put(message)
-
         '''
         while not foundEndOfFrame:
             recvByte = self.serialPort.read(1)
-            if recvByte == FRAME_FLAG and not foundStartOfFrame:
+            #print "Byte: %s" % recvByte.encode('hex')
+            if foundStartOfFrame and recvByte == chr(FRAME_FLAG) and not foundEscFlag:
+                # Found ending FRAME_FLAG
+                foundEndOfFrame = True
+             #   print "found ending of a frame"
+            elif recvByte == chr(FRAME_FLAG) and not foundStartOfFrame:
                 # Beginning of our message
                 foundStartOfFrame = True
-                message += recvByte
+             #   print "found start of frame"
             elif (foundStartOfFrame) and \
-                 (recvByte == FRAME_ESC) and not foundEscFlag:
+                 recvByte == chr(FRAME_ESC) and not foundEscFlag:
                 # Found an escape flag which was not escaped itself
                 foundEscFlag = True
+             #   print "found an escape flag"
             elif foundStartOfFrame and foundEscFlag:
                 # Byte preceded by FLAG_ESC so treat as normal data
                 foundEscFlag = False
                 message += recvByte
+             #   print "found an escape flag before and again so treating it as part of the message"
             elif foundStartOfFrame and not foundEscFlag:
                 # regular data part of message
                 message += recvByte
-            elif foundStartOfFrame and recvByte == FRAME_FLAG:
-                # Found ending FRAME_FLAG
-                foundEndOfFrame = True
-                message += recvByte
+             #   print "found a normal part of the message"
 
-        unpackedFrame = self.__unpackFrame(message)
-        unpackedMessage = self.__unpackMessage(unpackedFrame)
-
-        print "Arduino: %s" % unpackedMessage
+        unpackedMessage = self.__unpackMessage(message)
         self.recvMessageQueue.put(unpackedMessage)
-        '''
 
     def testMessagePacking(self, module, commandType, data):
         """ Test for the message pack and unpack functions """
@@ -428,7 +431,7 @@ def main():
 #        exit()
 
     arduino.initialize()
-    arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 'c')
+    arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 255)
     arduino.recvMessage()
 
 
