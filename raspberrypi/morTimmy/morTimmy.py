@@ -2,7 +2,7 @@
 
 # imports
 from hardware_controller import *
-from time import sleep
+from time import sleep, time
 import Queue
 
 
@@ -40,6 +40,7 @@ class Robot:
         Responsible for setting up the connection to the Arduino.
         The function loops until a connection is established
         """
+        self.arduino.initialize()
         while not self.arduino.isConnected:
             print ("Failed to establish connection to Arduino, retrying in 5s")
             sleep(5)                # wait 5sec before trying again
@@ -48,7 +49,7 @@ class Robot:
     def run(self):
         """ The main robot loop """
 
-        currentTime = time.time()
+        currentTime = time()
         deltaTime = self.runningTime - currentTime
 
         # Check connection to arduino, reinitialize if not
@@ -57,7 +58,7 @@ class Robot:
 
         # Move robot forward if stopped for 5sec
         if self.isStopped and deltaTime >= 5:
-            self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, '255')
+            self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 255)
             self.runningTime = currentTime
             self.isRunning = True
         # Stop robot if running for 5sec
@@ -66,14 +67,25 @@ class Robot:
             self.runningTime = currentTime
             self.isStopped = True
 
+        # Read bytes from the Arduino and add messages to the Queue if found
+        self.arduino.recvMessage()
+
         # Process all received messages in the queue
         while not self.arduino.recvMessageQueue.empty():
-            recvMessage = self.recvMessageQueue.get_nowait()
+            recvMessage = self.arduino.recvMessageQueue.get_nowait()
 
+            if recvMessage == None:
+                # Why does the queue always return a None object?
+                break;
+            print "msgID: %d ackID: %d module: %s commandType: %s data: %d" % (recvMessage['messageID'],
+                                                                               recvMessage['acknowledgeID'],
+                                                                               hex(recvMessage['module']),
+                                                                               hex(recvMessage['commandType']),
+                                                                               recvMessage['data'])
+            '''
             if recvMessage == 'Invalid':
                 print "LOG: received invalid packet, ignoring"
-                pass
-            elif recvMessage['module'] == MODULE_DISTANCE_SENSOR:
+            elif recvMessage['module'] == chr(MODULE_DISTANCE_SENSOR):
                 self.sensorDataQueue.put(recvMessage['data'])
             elif recvMessage['module'] == MODULE_MOTOR:
                 if recvMessage['commandType'] == CMD_MOTOR_FORWARD_NACK:
@@ -90,7 +102,7 @@ class Robot:
                 else:
                     print "Unknown %d cmd %d" % (recvMessage['module'],
                                                  recvMessage['commandType'])
-
+            '''
 
 def main():
     """ This is the main function of our script.
