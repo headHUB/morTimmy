@@ -68,20 +68,14 @@ class HardwareController():
     messageID      (unsigned long, 4 bytes, numeric id of the message)
     acknowledgeID  (unsigned long, 4 bytes, numeric id of the messageID
                     it replied to)
-    module         (unsigned short, 2 byte, arduino module to target)
-    commandType    (unsigned short, 2 byte, Type of command to send)
+    module         (unsigned char, 1 byte, Arduino module to target)
+    commandType    (unsigned char, 1 byte, Type of command to send)
     data           (unsigned long, 4 bytes, the data e.g. distance )
     checksum       (unsigned long, 4 bytes, CRC32)
 
     The commandType depicts the action that has to take place on the
-    specified module. If the action is succesful the other party will
-    reply with the same module and commandType. In addition it will
-    put the messageID of the original request in the acknowledgeID field.
-    If the command failed to run a NACK messaage will be send with the
-    acknowledgeID field filled in.
-
-    The data field contains data that might be returned like the distance
-    from a distance sensor.
+    specified module.  The data field contains data that might be returned 
+    like the distance from a distance sensor.
 
     The following modules are available currently:
         Arduino                 Controls the Arduino itself
@@ -98,6 +92,9 @@ class HardwareController():
     def __init__(self):
         """ Initializes the HardwareController
 
+        This sets up the recvMessageQueue which will hold
+        all the received messages from the Arduino
+
         TODO: Implement threading/queuing for the serial
         read process
         """
@@ -109,7 +106,12 @@ class HardwareController():
                    stopbits=serial.STOPBITS_ONE,
                    bytesize=serial.EIGHTBITS,
                    timeout=0):
-        """ The initialisation for the ArduinoSerialController class
+        """ initialize serial connection towards Arduino
+
+        First the serial connection is opened to the arduino. Then
+        we use the DTR pin to reset the arduino making sure we
+        have a clean session and flushed all data from the recv
+        buffer
 
         Args:
           serialPort (str): The port used to communicate with the Arduino
@@ -144,9 +146,6 @@ class HardwareController():
             print ("TODO: implement proper handshake between Arduino "
                    "and Pi to make sure it's initalised properly")
 
-            ''' TODO implement a handshake between the arduino and Pi
-            make sure we're not doing anything until the handshake is
-            finalised. '''
             '''
             self.serialPort.timeout = 0.1     # Set blocking read to 5 sec
             handshake = self.serialPort.readline()
@@ -172,6 +171,10 @@ class HardwareController():
     def __packMessage(self, module, commandType, data=0, acknowledgeID=0):
         """ Creates a message understood by the Arduino
 
+        The checksum is calculated over the full packet with checksum field
+        set to 0. The data is then repacked again with the calculated 
+        checksum
+
           Message structure
         +-----------+--------+-------------+-------+----------+
         | messageID | module | commandType |  data | checksum |
@@ -184,17 +187,9 @@ class HardwareController():
 
         Returns:
             Message byte string
-
-        TODO:
-            Need to do validation checks for all given arguments
-            Implement CRC checksum on raspberry and arduino
         """
 
         self.__lastMessageID += 1
-
-        # pack the message into binary format using ! for platform independency
-        # (big-endian, standard type size, no pad bytes). Then calculate
-        # the packet checksum and repack the message
 
         checksum = 0
         rawMessage = struct.pack('<LLBBLL',
@@ -205,7 +200,10 @@ class HardwareController():
                                  data,
                                  checksum)
 
-        checksum = crc32(rawMessage)
+        # Calculate the checksum. & 0xffffffff is ensuring
+        # the checksum is an unsigned long as 32bit python
+        # sometimes returns a signed int
+        checksum = crc32(rawMessage) & 0xffffffff
 
         rawMessage = struct.pack('<LLBBLL',
                                  self.__lastMessageID,
@@ -220,19 +218,24 @@ class HardwareController():
     def __unpackMessage(self, message):
         """ Unpacks a message received from the Arduino
 
+        It unpacks the received struct into seperate variables.
+        Then it repacks the message again but with a checksum of 0
+        to verify the data is transmitted intact.
+
+        A dictionary containing the received data is added to the
+        recvMessageQueue if the message was valid.
+
         Args:
             message (struct): A message unpacked from a frame
-
-        Returns:
-            A dict containing:
-               messageID
-               module
-               commandType
-               data
         """
         try:
             (messageID, acknowledgeID, module, commandType,
             data, recvChecksum) = struct.unpack('<LLBBLL', message)
+
+            # recalculate the checksum to check if we received
+            # a valid message. & 0xffffffff is ensuring
+            # the checksum is an unsigned long as 32bit python 2.x
+            # sometimes returns a signed int
 
             checksum = 0
             rawMessage = struct.pack('<LLBBLL',
@@ -243,9 +246,8 @@ class HardwareController():
                                      data,
                                      checksum)
 
-            calcChecksum = crc32(rawMessage)
-            print calcChecksum 
-            print recvChecksum
+            calcChecksum = crc32(rawMessage) & 0xffffffff
+
             if recvChecksum == calcChecksum:
                 self.recvMessageQueue.put({'messageID': messageID,
                                            'acknowledgeID': acknowledgeID,
@@ -259,15 +261,15 @@ class HardwareController():
                 self.recvMessageQueue.put("Invalid")
 
     def __packFrame(self, message):
-        """ Packs the command into a frame
+        """ Packs the message into a frame
 
-        Performs checksum calculation, escapes any potential
-        characters that matches a frame control flag and applies
-        the frame marker to the beginning and end of the frame
+        Escapes any special chars and applies
+        the frame marker to the beginning and end 
+        of the frame
 
         Args:
-            message (struct message): The message to be sent to
-                                      the arduino
+            message (struct): The message to be sent to
+                              the arduino
 
         Returns:
             A packed frame suitable for sending to the arduino
@@ -294,11 +296,11 @@ class HardwareController():
             frame (string): The received frame from
                             the arduino
         Returns:
-            message (struct message): A received message from the
-                                      arduino
+            message (struct): A received message from the
+                              arduino
         """
 
-        nextByteValid = False
+        nextByteValid = False   # Indicates we found a FRAME_ESC char
         message = b''
 
         if(frame[:1] != chr(FRAME_FLAG)) or (frame[-1:] != chr(FRAME_FLAG)):
@@ -319,11 +321,16 @@ class HardwareController():
     def sendMessage(self, module, commandType, data=0, acknowledgeID=0):
         """ Send data onto the serial port towards the arduino.
 
-        Used by the HardwareController class to send commands.
+        Used by the HardwareController class to send commands. It packs
+        the message into a struct using the given arguments. The packed
+        message then gets processed by __packFrame to ensure any special
+        characters are escaped with FRAME_ESC and a beginning and end 
+        flag is added to the message.
 
         Args:
-          data (str): The data string to send to the arduino. This
-            is used by the public sendCommand() function
+            module (byte):      The module to address
+            commandType (byte): The command to send to the specified module
+            data (int):         The data that goes with the command (if any)
         """
 
         if not self.isConnected:
@@ -343,16 +350,22 @@ class HardwareController():
                "cmd=%s "
                "data=%s ") % (self.__lastMessageID, acknowledgeID, hex(module),
                               hex(commandType), data)
-        # self.serialPort.write(packedFrame)
+
+        self.serialPort.write(packedFrame)
 
     def recvMessage(self):
         """ Receive data from the Arduino through the serial port.
 
         Used by the HardwareController class to receive
-        commands from the Arduino.
+        messages from the Arduino. It reads single bytes from the 
+        serial port and starts processing when it finds the beginning
+        of a message (FRAME_FLAG). each subsequent byte is read and checked
+        for a FRAME_FLAG message or a FRAME_ESC escape flag for special
+        characters. 
 
-        Returns:
-            (messageID, acknowledgeID, module, commandType, data, checksum)
+        When a full message is found it is passed to the __unpackMessage function.
+        This converts the received message to a dictionary and adds it to the 
+        recvMessageQueue.
         """
 
         if not self.isConnected:
@@ -364,14 +377,6 @@ class HardwareController():
         foundEndOfFrame = False
         foundEscFlag = False
 
-        '''
-        self.serialPort.timeout = 5
-        message = self.serialPort.readline()
-        if message is not None and message is not '':
-            print "TEMP READLINE UNTIL SERIAL PROTO IS CODED ON ARDUINO"
-            print "%s" % message
-            self.recvMessageQueue.put(message)
-        '''
         while not foundEndOfFrame:
             recvByte = self.serialPort.read(1)
             #print "Byte: %s" % recvByte.encode('hex')
@@ -400,25 +405,6 @@ class HardwareController():
 
         unpackedMessage = self.__unpackMessage(message)
         self.recvMessageQueue.put(unpackedMessage)
-
-    def testMessagePacking(self, module, commandType, data):
-        """ Test for the message pack and unpack functions """
-
-        print "Packing message..."
-        packedMessage = self.__packMessage(module, commandType, data)
-        print ''.join(["\\x%02x" % ord(x) for x in packedMessage])
-
-        print "Packing message into frame..."
-        frame = self.__packFrame(packedMessage)
-        print ''.join(["\\x%02x" % ord(x) for x in frame])
-
-        print "Unpacking message from frame..."
-        unpackedFrame = self.__unpackFrame(frame)
-        print ''.join(["\\x%02x" % ord(x) for x in unpackedFrame])
-
-        print "Unpacking message..."
-        unpackedMessage = self.__unpackMessage(packedMessage)
-        print unpackedMessage
 
 
 def main():
