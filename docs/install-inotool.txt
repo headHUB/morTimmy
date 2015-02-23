@@ -1,0 +1,30 @@
+inotools allow you to compile and Arduino code. Here's a quick rundown on how to install it on a Raspberry Pi:
+
+  sudo apt-get install python-configobj python-setuptools git python-jinja2 python-serial picocom
+
+clone ino from github:
+
+  mkdir ~/development/arduino
+  cd ~/arduino/
+  git clone git://github.com/amperka/ino.git
+
+  cd ino
+   (sudo or su)
+    make install
+
+Sometimes ino does not like the version string provided, cat the file  /usr/share/arduino/lib/version.txt , it should look something like  1:1.0.5+dfsg2-1
+, backup the file and leave just  1.0.5.
+
+Here's a sample of my .inorc file:
+
+~/.inorc:
+
+  [build]
+  board-model = ATMega
+
+  [upload]
+  board-model = ATMega
+  serial-port = /dev/ttyACM0
+
+  [serial]
+  serial-port = /dev/ttyACM0

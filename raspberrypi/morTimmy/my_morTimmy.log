@@ -1,0 +1,118 @@
+2015-02-23 23:23:08,666 INFO initialising morTimmy the robot
+2015-02-23 23:23:09,171 INFO Connected to Arduino through serial connection
+2015-02-23 23:23:09,172 INFO Updated distance sensor, last reading was at 0
+2015-02-23 23:23:10,122 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,123 DEBUG msgID: 1 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xc25d409cL
+2015-02-23 23:23:10,139 INFO Updated distance sensor, last reading was at 1424733789
+2015-02-23 23:23:10,142 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,143 DEBUG msgID: 2 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x28db9dfe
+2015-02-23 23:23:10,163 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,164 DEBUG msgID: 3 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xc7892b1fL
+2015-02-23 23:23:10,187 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,188 DEBUG msgID: 4 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x26a7217b
+2015-02-23 23:23:10,207 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,208 DEBUG msgID: 5 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xc9f5979aL
+2015-02-23 23:23:10,228 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,229 DEBUG msgID: 6 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x23734af8
+2015-02-23 23:23:10,248 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,249 DEBUG msgID: 7 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xcc21fc19L
+2015-02-23 23:23:10,270 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,270 DEBUG msgID: 8 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x3a5e5871
+2015-02-23 23:23:10,290 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,290 DEBUG msgID: 9 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xd50cee90L
+2015-02-23 23:23:10,310 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,310 DEBUG msgID: 10 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x3f8a33f2
+2015-02-23 23:23:10,331 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,331 DEBUG msgID: 11 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xd0d88513L
+2015-02-23 23:23:10,355 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,355 DEBUG msgID: 12 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x31f68f77
+2015-02-23 23:23:10,376 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,377 DEBUG msgID: 13 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xdea43996L
+2015-02-23 23:23:10,396 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,397 DEBUG msgID: 14 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x3422e4f4
+2015-02-23 23:23:10,416 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,417 DEBUG msgID: 15 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xdb705215L
+2015-02-23 23:23:10,437 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,438 DEBUG msgID: 16 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x3acaa65
+2015-02-23 23:23:10,458 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,458 DEBUG msgID: 17 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xecfe1c84L
+2015-02-23 23:23:10,477 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,478 DEBUG msgID: 18 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x678c1e6
+2015-02-23 23:23:10,499 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,499 DEBUG msgID: 19 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xe92a7707L
+2015-02-23 23:23:10,519 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,519 DEBUG msgID: 20 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x8047d63
+2015-02-23 23:23:10,540 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,540 DEBUG msgID: 21 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xe756cb82L
+2015-02-23 23:23:10,560 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,560 DEBUG msgID: 22 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xdd016e0
+2015-02-23 23:23:10,584 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,584 DEBUG msgID: 23 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xe282a001L
+2015-02-23 23:23:10,605 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,606 DEBUG msgID: 24 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x14fd0469
+2015-02-23 23:23:10,625 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,626 DEBUG msgID: 25 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xfbafb288L
+2015-02-23 23:23:10,646 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,647 DEBUG msgID: 26 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x11296fea
+2015-02-23 23:23:10,648 INFO Updated distance sensor, last reading was at 1424733790
+2015-02-23 23:23:10,667 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,667 DEBUG msgID: 27 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xfe7bd90bL
+2015-02-23 23:23:10,687 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,687 DEBUG msgID: 28 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x1f55d36f
+2015-02-23 23:23:10,708 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,708 DEBUG msgID: 29 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xf007658eL
+2015-02-23 23:23:10,728 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,728 DEBUG msgID: 30 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x1a81b8ec
+2015-02-23 23:23:10,748 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,748 DEBUG msgID: 31 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xf5d30e0dL
+2015-02-23 23:23:10,773 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,773 DEBUG msgID: 32 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x70494e4d
+2015-02-23 23:23:10,793 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,793 DEBUG msgID: 33 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x9f1bf8acL
+2015-02-23 23:23:10,814 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,815 DEBUG msgID: 34 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x759d25ce
+2015-02-23 23:23:10,834 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,835 DEBUG msgID: 35 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x9acf932fL
+2015-02-23 23:23:10,854 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,855 DEBUG msgID: 36 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x7be1994b
+2015-02-23 23:23:10,876 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,876 DEBUG msgID: 37 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x94b32faaL
+2015-02-23 23:23:10,896 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,896 DEBUG msgID: 38 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x7e35f2c8
+2015-02-23 23:23:10,917 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,917 DEBUG msgID: 39 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x91674429L
+2015-02-23 23:23:10,937 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,937 DEBUG msgID: 40 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x6718e041
+2015-02-23 23:23:10,957 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,957 DEBUG msgID: 41 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x884a56a0L
+2015-02-23 23:23:10,982 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:10,982 DEBUG msgID: 42 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x62cc8bc2
+2015-02-23 23:23:11,002 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,002 DEBUG msgID: 43 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x8d9e3d23L
+2015-02-23 23:23:11,023 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,024 DEBUG msgID: 44 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x6cb03747
+2015-02-23 23:23:11,043 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,044 DEBUG msgID: 45 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x83e281a6L
+2015-02-23 23:23:11,063 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,064 DEBUG msgID: 46 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x69645cc4
+2015-02-23 23:23:11,085 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,085 DEBUG msgID: 47 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x8636ea25L
+2015-02-23 23:23:11,105 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,105 DEBUG msgID: 48 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x5eea1255
+2015-02-23 23:23:11,126 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,126 DEBUG msgID: 49 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xb1b8a4b4L
+2015-02-23 23:23:11,146 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,146 DEBUG msgID: 50 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x5b3e79d6
+2015-02-23 23:23:11,166 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,166 DEBUG msgID: 51 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xb46ccf37L
+2015-02-23 23:23:11,167 INFO Updated distance sensor, last reading was at 1424733790
+2015-02-23 23:23:11,187 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,188 DEBUG msgID: 52 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x5542c553
+2015-02-23 23:23:11,207 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,208 DEBUG msgID: 53 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xba1073b2L
+2015-02-23 23:23:11,231 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,232 DEBUG msgID: 54 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x5096aed0
+2015-02-23 23:23:11,252 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,253 DEBUG msgID: 55 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0xbfc41831L
+2015-02-23 23:23:11,272 DEBUG Message with unknown module or command received. Message details:
+2015-02-23 23:23:11,273 DEBUG msgID: 56 ackID: 0 module: 0x31 commandType: 0x64 data: 1 checksum: 0x49bbbc59

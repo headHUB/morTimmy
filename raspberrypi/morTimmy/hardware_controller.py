@@ -88,6 +88,7 @@ class HardwareController():
 
     __lastMessageID = 0         # holds the last used messageID
     isConnected = False
+    distanceSensorValue = 0
 
     def __init__(self):
         """ Initializes the HardwareController
@@ -141,7 +142,6 @@ class HardwareController():
             sleep(0.5)
             self.serialPort.flushInput()
             self.serialPort.setDTR()
-            sleep(0.5)
 
             print ("TODO: implement proper handshake between Arduino "
                    "and Pi to make sure it's initalised properly")

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # imports
+import logging
 from hardware_controller import *
 from time import sleep, time
 import Queue
@@ -14,16 +15,20 @@ class Robot:
     an interface to the DC motors and various sensors
     """
 
+    LOG_FILENAME = 'my_morTimmy.log'
+    SENSOR_READ_INTERVAL = 0.5
+
     arduino = HardwareController()
     runningTime = 0
+    lastSensorReading = 0
     isRunning = False
     isStopped = True
 
     def __init__(self):
         """ Called when the robot class is created.
 
-        At the moment we only launch into the self.initialize()
-        function.
+        It intializes the sensor data queue and sets up the 
+        logging output file
 
         Returns:
 
@@ -31,6 +36,10 @@ class Robot:
           TODO: Add proper error handling.
         """
 
+        logging.basicConfig(filename=self.LOG_FILENAME,
+                            level=logging.DEBUG,
+                            format='%(asctime)s %(levelname)s %(message)s')
+        logging.info('initialising morTimmy the robot')
         self.sensorDataQueue = Queue.Queue()
         self.initialize()
 
@@ -43,26 +52,37 @@ class Robot:
         self.arduino.initialize()
         while not self.arduino.isConnected:
             print ("Failed to establish connection to Arduino, retrying in 5s")
+            logging.debug('Failed to establish connection to Arduino, retrying in 5s')
             sleep(5)                # wait 5sec before trying again
             self.arduino.initialize()
+        logging.info('Connected to Arduino through serial connection') 
 
     def run(self):
         """ The main robot loop """
 
         currentTime = time()
-        deltaTime = self.runningTime - currentTime
 
         # Check connection to arduino, reinitialize if not
         if not self.arduino.isConnected:
             self.arduino.initialize()
 
+        # If the sensor update time has exceeded
+        # update the sensor data
+        if (currentTime - self.lastSensorReading) >= self.SENSOR_READ_INTERVAL:
+            print "Updated distance sensor, last reading was at %d" % self.lastSensorReading
+            logging.info('Updated distance sensor, last reading was at %d' % self.lastSensorReading)
+            while not self.sensorDataQueue.empty():
+                lastSensorReading = self.sensorDataQueue.get_nowait()
+                self.distanceSensorValue = self.arduino.distanceSensorValue
+            self.lastSensorReading = currentTime
+
         # Move robot forward if stopped for 5sec
-        if self.isStopped and deltaTime >= 5:
+        if self.isStopped and (self.runningTime - currentTime) >= 5:
             self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 255)
             self.runningTime = currentTime
             self.isRunning = True
         # Stop robot if running for 5sec
-        elif self.isRunning and deltaTime >= 5:
+        elif self.isRunning and (self.runningTime - currentTime) >= 5:
             self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_STOP)
             self.runningTime = currentTime
             self.isStopped = True
@@ -78,35 +98,21 @@ class Robot:
                 # Why does the queue always return a None object?
                 break;
             elif recvMessage == 'Invalid':
-                print "Invalid checksum or error"
-            else:
-                print "msgID: %d ackID: %d module: %s commandType: %s data: %d checksum: %s" % (recvMessage['messageID'],
-                                                                               recvMessage['acknowledgeID'],
-                                                                               hex(recvMessage['module']),
-                                                                               hex(recvMessage['commandType']),
-                                                                               recvMessage['data'],
-                                                                               hex(recvMessage['checksum']))
-            '''
-            if recvMessage == 'Invalid':
-                print "LOG: received invalid packet, ignoring"
+                logging.error('Received invalid packet, ignoring');
             elif recvMessage['module'] == chr(MODULE_DISTANCE_SENSOR):
-                self.sensorDataQueue.put(recvMessage['data'])
-            elif recvMessage['module'] == MODULE_MOTOR:
-                if recvMessage['commandType'] == CMD_MOTOR_FORWARD_NACK:
-                    print ("Error moving forward, resending command")
-                    self.arduino.sendMessage(MODULE_MOTOR,
-                                             CMD_MOTOR_FORWARD,
-                                             '255')
-                elif recvMessage['commandType'] == CMD_MOTOR_BACK_NACK:
-                    pass
-                elif recvMessage['commandType'] == CMD_MOTOR_LEFT_NACK:
-                    pass
-                elif recvMessage['commandType'] == CMD_MOTOR_RIGHT_NACK:
-                    pass
-                else:
-                    print "Unknown %d cmd %d" % (recvMessage['module'],
-                                                 recvMessage['commandType'])
-            '''
+                self.sensorDataQueue.put({'sensor': recvMessage['module'],
+                                          'data': recvMessage['data']})
+            else:
+                
+                logging.debug("Message with unknown module or command received. Message details:")
+                logging.debug("msgID: %d ackID: %d module: %s "
+                              "commandType: %s data: %d checksum: %s" % (recvMessage['messageID'],
+                                                                          recvMessage['acknowledgeID'],
+                                                                          hex(recvMessage['module']),
+                                                                          hex(recvMessage['commandType']),
+                                                                          recvMessage['data'],
+                                                                          hex(recvMessage['checksum'])))
+
 
 def main():
     """ This is the main function of our script.
