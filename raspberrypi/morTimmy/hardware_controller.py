@@ -86,9 +86,9 @@ class HardwareController():
         CompassSensor           Handles the Compass sensor
     """
 
-    __lastMessageID = 0         # holds the last used messageID
+    __lastMessageID = 0        # holds the last used messageID
     isConnected = False
-    distanceSensorValue = 0
+    __distanceSensorValues = [0, 3, 0]    # holds the last three measured values
 
     def __init__(self):
         """ Initializes the HardwareController
@@ -101,6 +101,28 @@ class HardwareController():
         """
 
         self.recvMessageQueue = Queue.Queue()
+
+    def setDistance(self, distance):
+        """ Set the latest distance sensor value
+
+        This function will pop the oldest value of the 
+        __distanceSensorValues list and amend it with the
+        latest reading
+        """
+
+        self.__distanceSensorValues.pop(0)
+        self.__distanceSensorValues.append(distance)
+        print "HIT: new list is %s" % str(self.__distanceSensorValues)
+
+    def getDistance(self, numOfSamples=3):
+        """ get the distance measures by the distance sensor
+
+        The distance is calculated taking the average of the last
+        three measurements
+        """
+
+        return sum(self.__distanceSensorValues)/numOfSamples
+
 
     def initialize(self, serialPort='/dev/ttyACM0',
                    baudrate=9600,

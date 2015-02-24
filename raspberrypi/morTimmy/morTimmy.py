@@ -15,14 +15,16 @@ class Robot:
     an interface to the DC motors and various sensors
     """
 
-    LOG_FILENAME = 'my_morTimmy.log'
-    SENSOR_READ_INTERVAL = 0.5
+    class State:
+        """ Set the state of the Robot """
+        running = "running"
+        stopped = "stopped"
+        autonomous = "autonomous"
 
-    arduino = HardwareController()
-    runningTime = 0
-    lastSensorReading = 0
-    isRunning = False
-    isStopped = True
+    # Note: only variables belonging to all 
+    # instances of the class belong here. Others
+    # should be initialised in __init__
+    MIN_DISTANCE_TO_OBJECT = 10
 
     def __init__(self):
         """ Called when the robot class is created.
@@ -36,8 +38,16 @@ class Robot:
           TODO: Add proper error handling.
         """
 
+        self.LOG_FILENAME = 'my_morTimmy.log'
+        self.state = self.State()
+        self.currentState = self.state.stopped
+        self.arduino = HardwareController()
+        self.runningTime = 0
+        self.lastSensorReading = 0
+
         logging.basicConfig(filename=self.LOG_FILENAME,
                             level=logging.DEBUG,
+                            filemode='w',
                             format='%(asctime)s %(levelname)s %(message)s')
         logging.info('initialising morTimmy the robot')
         self.sensorDataQueue = Queue.Queue()
@@ -55,37 +65,34 @@ class Robot:
             logging.debug('Failed to establish connection to Arduino, retrying in 5s')
             sleep(5)                # wait 5sec before trying again
             self.arduino.initialize()
-        logging.info('Connected to Arduino through serial connection') 
+        logging.info('Connected to Arduino through serial connection')
+        self.runningTime = 0
 
     def run(self):
         """ The main robot loop """
-
-        currentTime = time()
 
         # Check connection to arduino, reinitialize if not
         if not self.arduino.isConnected:
             self.arduino.initialize()
 
-        # If the sensor update time has exceeded
-        # update the sensor data
-        if (currentTime - self.lastSensorReading) >= self.SENSOR_READ_INTERVAL:
-            print "Updated distance sensor, last reading was at %d" % self.lastSensorReading
-            logging.info('Updated distance sensor, last reading was at %d' % self.lastSensorReading)
-            while not self.sensorDataQueue.empty():
-                lastSensorReading = self.sensorDataQueue.get_nowait()
-                self.distanceSensorValue = self.arduino.distanceSensorValue
-            self.lastSensorReading = currentTime
+        currentTime = time()
+
+        # Turn robot randomly to the left or right when an object is near
+        if self.arduino.getDistance() <= self.MIN_DISTANCE_TO_OBJECT:
+            pass
 
         # Move robot forward if stopped for 5sec
-        if self.isStopped and (self.runningTime - currentTime) >= 5:
+        if self.currentState == self.state.stopped and (currentTime - self.runningTime) >= 5:
             self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 255)
             self.runningTime = currentTime
-            self.isRunning = True
+            self.currentState = self.state.running
+            print "Robot moving forward"
         # Stop robot if running for 5sec
-        elif self.isRunning and (self.runningTime - currentTime) >= 5:
+        elif self.currentState == self.state.running and (currentTime - self.runningTime) >= 5:
             self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_STOP)
             self.runningTime = currentTime
-            self.isStopped = True
+            self.currentState = self.state.stopped
+            print "Robot stopped"
 
         # Read bytes from the Arduino and add messages to the Queue if found
         self.arduino.recvMessage()
@@ -100,10 +107,8 @@ class Robot:
             elif recvMessage == 'Invalid':
                 logging.error('Received invalid packet, ignoring');
             elif recvMessage['module'] == chr(MODULE_DISTANCE_SENSOR):
-                self.sensorDataQueue.put({'sensor': recvMessage['module'],
-                                          'data': recvMessage['data']})
+                self.arduino.setDistance(recvMessage['data'])
             else:
-                
                 logging.debug("Message with unknown module or command received. Message details:")
                 logging.debug("msgID: %d ackID: %d module: %s "
                               "commandType: %s data: %d checksum: %s" % (recvMessage['messageID'],
