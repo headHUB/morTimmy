@@ -169,7 +169,7 @@ class HardwareController():
         except:
             pass
 
-    def __packMessage(self, module, commandType, data='', acknowledgeID=0):
+    def __packMessage(self, module, commandType, data=0, acknowledgeID=0):
         """ Creates a message understood by the Arduino
 
           Message structure
@@ -200,18 +200,18 @@ class HardwareController():
         rawMessage = struct.pack('<LLBBLL',
                                  self.__lastMessageID,
                                  acknowledgeID,
-                                 chr(module),
-                                 chr(commandType),
+                                 module,
+                                 commandType,
                                  data,
                                  checksum)
 
-        checksum = crc32(rawMessage[:-4])
+        checksum = crc32(rawMessage)
 
         rawMessage = struct.pack('<LLBBLL',
                                  self.__lastMessageID,
                                  acknowledgeID,
-                                 chr(module),
-                                 chr(commandType),
+                                 module,
+                                 commandType,
                                  data,
                                  checksum)
 
@@ -233,12 +233,20 @@ class HardwareController():
         try:
             (messageID, acknowledgeID, module, commandType,
             data, recvChecksum) = struct.unpack('<LLBBLL', message)
-    
-            calcChecksum = crc32(message[:-4])
-            print "calc: %s" % hex(calcChecksum)
-            print "recv: %s" % hex(recvChecksum)
-            print "HIT, change != into == here when you've fixed the crc32 checking on arduino"
-            if recvChecksum != calcChecksum:
+
+            checksum = 0
+            rawMessage = struct.pack('<LLBBLL',
+                                     messageID,
+                                     acknowledgeID,
+                                     module,
+                                     commandType,
+                                     data,
+                                     checksum)
+
+            calcChecksum = crc32(rawMessage)
+            print calcChecksum 
+            print recvChecksum
+            if recvChecksum == calcChecksum:
                 self.recvMessageQueue.put({'messageID': messageID,
                                            'acknowledgeID': acknowledgeID,
                                            'module': module,
@@ -248,7 +256,7 @@ class HardwareController():
             else:
                 self.recvMessageQueue.put("Invalid")
         except Exception, e:
-                self.recvMessageQueue.put("Invalid %s" % e)
+                self.recvMessageQueue.put("Invalid")
 
     def __packFrame(self, message):
         """ Packs the command into a frame
@@ -308,7 +316,7 @@ class HardwareController():
 
         return message
 
-    def sendMessage(self, module, commandType, data, acknowledgeID=0):
+    def sendMessage(self, module, commandType, data=0, acknowledgeID=0):
         """ Send data onto the serial port towards the arduino.
 
         Used by the HardwareController class to send commands.
@@ -334,7 +342,7 @@ class HardwareController():
                "module=%s "
                "cmd=%s "
                "data=%s ") % (self.__lastMessageID, acknowledgeID, hex(module),
-                              hex(commandType), len(data), data)
+                              hex(commandType), data)
         # self.serialPort.write(packedFrame)
 
     def recvMessage(self):

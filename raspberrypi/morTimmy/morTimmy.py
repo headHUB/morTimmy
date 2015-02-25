@@ -77,7 +77,10 @@ class Robot:
             if recvMessage == None:
                 # Why does the queue always return a None object?
                 break;
-            print "msgID: %d ackID: %d module: %s commandType: %s data: %d checksum: %s" % (recvMessage['messageID'],
+            elif recvMessage == 'Invalid':
+                print "Invalid checksum or error"
+            else:
+                print "msgID: %d ackID: %d module: %s commandType: %s data: %d checksum: %s" % (recvMessage['messageID'],
                                                                                recvMessage['acknowledgeID'],
                                                                                hex(recvMessage['module']),
                                                                                hex(recvMessage['commandType']),
