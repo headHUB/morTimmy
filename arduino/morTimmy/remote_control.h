@@ -71,3 +71,4 @@ namespace morTimmy {
       virtual bool getRemoteCommand(command_t& cmd) = 0;
   };
 };
+

@@ -26,3 +26,4 @@ namespace morTimmy {
       NewPing sensor;
   };
 };
+

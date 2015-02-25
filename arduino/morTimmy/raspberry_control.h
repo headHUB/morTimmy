@@ -72,17 +72,16 @@ namespace morTimmy {
         lastMessageID++;
         msg.messageID = lastMessageID;
         msg.checksum = 0;
-        
-        // Copy the message minus the checksum into a byte string
-        // Then perform the checksum on the message and copy
-        // the full msg into byteMsg
-        char byteMsgForCrc32[sizeof(msg)-4];
-        memcpy(byteMsgForCrc32, &msg, sizeof(msg)-4);
-        msg.checksum = crc_string(byteMsgForCrc32);
-        
+       
+        // Copy the struct in a char[]
         char byteMsg[sizeof(msg)];
         memcpy(byteMsg, &msg, sizeof(msg));
-        
+
+        // calculate the checksum of the message (with checksum set to 0)
+        // then copy the struct again but now with the proper checksum 
+        msg.checksum = crc_string(byteMsg, sizeof(byteMsg));
+        memcpy(byteMsg, &msg, sizeof(msg));
+
         // First we iterate through the message to see if
         // there are any special chars that need escaping
         int msgSizeIncrease = 0;
@@ -112,18 +111,22 @@ namespace morTimmy {
           }
           Serial.write(FRAME_FLAG);
           Serial.write(tmpByteMsg, sizeof(tmpByteMsg));
-          Serial.write(FRAME_FLAG);
+          Serial.write(FRAME_FLAG);    
         } else {
 
         // Print the packet bytes to the serial port including
         // the FRAME_FLAG to the start and end of the message
+        
         Serial.write(FRAME_FLAG);
         Serial.write(byteMsg, sizeof(byteMsg));
         Serial.write(FRAME_FLAG);
     
           /** Uncomment the following section if you want to 'pretty print' 
           the packets into HEX on the serial port
-    
+          
+          Serial.print("Packet size: ");
+          Serial.println(sizeof(byteMsg));
+          
           Serial.print("0x");
           Serial.print(FRAME_FLAG, HEX);
           Serial.print(" ");
@@ -134,8 +137,9 @@ namespace morTimmy {
           }
           Serial.print(FRAME_FLAG, HEX);
           Serial.println();
-          */
+          */ 
         } 
       }      
   };
 };
+

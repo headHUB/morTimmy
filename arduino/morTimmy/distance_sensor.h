@@ -24,3 +24,4 @@ namespace morTimmy {
       unsigned int maxDistance;
   };
 };
+

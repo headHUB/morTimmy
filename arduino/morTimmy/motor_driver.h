@@ -24,3 +24,4 @@ namespace morTimmy {
             virtual int getSpeed() const = 0;
     };
 };
+

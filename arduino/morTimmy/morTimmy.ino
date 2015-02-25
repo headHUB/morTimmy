@@ -97,7 +97,8 @@ namespace morTimmy {
               msg.module = MODULE_DISTANCE_SENSOR;
               msg.commandType = CMD_ARDUINO_START;
               msg.acknowledgeID = 0;
-              msg.data = (unsigned long) distance;
+              msg.data = (unsigned long) 1;
+              msg.checksum = 0;
               
               raspberry.sendMessage(msg);
               if (remoteControlled()) {

@@ -17,11 +17,13 @@ unsigned long crc_update(unsigned long crc, byte data)
     return crc;
 }
 
-unsigned long crc_string(char *s)
+unsigned long crc_string(char *s, size_t arraySize)
 {
   unsigned long crc = ~0L;
-  while (*s)
-    crc = crc_update(crc, *s++);
+  for (int i=0; i < arraySize; i++) {
+    crc = crc_update(crc, s[i]);
+  }
   crc = ~crc;
   return crc;
 }
+

@@ -205,7 +205,7 @@ class HardwareController():
                                  data,
                                  checksum)
 
-        checksum = crc32(rawMessage[:-4]) & 0xffffffff
+        checksum = crc32(rawMessage[:-4])
 
         rawMessage = struct.pack('<LLBBLL',
                                  self.__lastMessageID,
