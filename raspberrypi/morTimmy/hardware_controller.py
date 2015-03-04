@@ -5,7 +5,7 @@ import struct 	         	# Python struct library for constructing the message
 import Queue
 from zlib import crc32      # used to calculate a message checksum
 from time import sleep
-
+import logging
 
 # Definitions
 
@@ -74,7 +74,7 @@ class HardwareController():
     checksum       (unsigned long, 4 bytes, CRC32)
 
     The commandType depicts the action that has to take place on the
-    specified module.  The data field contains data that might be returned 
+    specified module.  The data field contains data that might be returned
     like the distance from a distance sensor.
 
     The following modules are available currently:
@@ -88,7 +88,7 @@ class HardwareController():
 
     __lastMessageID = 0        # holds the last used messageID
     isConnected = False
-    __distanceSensorValues = [0, 3, 0]    # holds the last three measured values
+    __distanceSensorValues = [0, 3, 0]    # holds the last three measured vals
 
     def __init__(self):
         """ Initializes the HardwareController
@@ -101,18 +101,20 @@ class HardwareController():
         """
 
         self.recvMessageQueue = Queue.Queue()
+        logging.getLogger()
 
     def setDistance(self, distance):
         """ Set the latest distance sensor value
 
-        This function will pop the oldest value of the 
+        This function will pop the oldest value of the
         __distanceSensorValues list and amend it with the
         latest reading
         """
 
         self.__distanceSensorValues.pop(0)
         self.__distanceSensorValues.append(distance)
-        print "HIT: new list is %s" % str(self.__distanceSensorValues)
+        logging.info("morTimmy: new distance "
+                     "value is %s") % str(self.__distanceSensorValues)
 
     def getDistance(self, numOfSamples=3):
         """ get the distance measures by the distance sensor
@@ -122,7 +124,6 @@ class HardwareController():
         """
 
         return sum(self.__distanceSensorValues)/numOfSamples
-
 
     def initialize(self, serialPort='/dev/ttyACM0',
                    baudrate=9600,
@@ -148,10 +149,10 @@ class HardwareController():
         """
 
         try:
-            print ("Opening serial connection to arduino on"
-                   "port %s with baudrate %d") % (serialPort, baudrate)
+            logging.info("Opening serial connection to arduino on"
+                         "port %s with baudrate %d") % (serialPort, baudrate)
             self.serialPort = serial.Serial(serialPort, baudrate)
-            print "Connected to Arduino"
+            logging.info("Connected to Arduino")
 
             '''  Reset the arduino by setting the DTR pin LOW and then
             HIGH again. This is the same as pressing the reset button
@@ -159,14 +160,14 @@ class HardwareController():
             is in progress is to ensure there is no data from before
             the Arduino was reset in the serial buffer '''
 
-            print "Resetting Arduino using DTR pin"
+            logging.info("Resetting Arduino using DTR pin")
             self.serialPort.setDTR(level=False)
             sleep(0.5)
             self.serialPort.flushInput()
             self.serialPort.setDTR()
 
-            print ("TODO: implement proper handshake between Arduino "
-                   "and Pi to make sure it's initalised properly")
+            logging.info("TODO: implement proper handshake between Arduino "
+                         "and Pi to make sure it's initalised properly")
 
             '''
             self.serialPort.timeout = 0.1     # Set blocking read to 5 sec
@@ -176,11 +177,11 @@ class HardwareController():
             '''
             self.isConnected = True
         except OSError:
-            print "Failed to connect to Arduino on serial port %s" % serialPort
+            logging.error("Failed to connect to Arduino on "
+                          "serial port %s") % serialPort
             self.isConnected = False
         except Exception, e:
-            print "Unexpected error whilst connecting to Arduino"
-            print "Exception: %s Error: %s" % (Exception, e)
+            logging.error("Unexpected error whilst connecting to Arduino")
             self.isConnected = False
 
     def __del__(self):
@@ -194,7 +195,7 @@ class HardwareController():
         """ Creates a message understood by the Arduino
 
         The checksum is calculated over the full packet with checksum field
-        set to 0. The data is then repacked again with the calculated 
+        set to 0. The data is then repacked again with the calculated
         checksum
 
           Message structure
@@ -252,7 +253,7 @@ class HardwareController():
         """
         try:
             (messageID, acknowledgeID, module, commandType,
-            data, recvChecksum) = struct.unpack('<LLBBLL', message)
+             data, recvChecksum) = struct.unpack('<LLBBLL', message)
 
             # recalculate the checksum to check if we received
             # a valid message. & 0xffffffff is ensuring
@@ -278,15 +279,15 @@ class HardwareController():
                                            'data': data,
                                            'checksum': recvChecksum})
             else:
-                self.recvMessageQueue.put("Invalid")
+                self.recvMessageQueue.put("Invalid: Checksum failed")
         except Exception, e:
-                self.recvMessageQueue.put("Invalid")
+            self.recvMessageQueue.put("Invalid: %s" % e)
 
     def __packFrame(self, message):
         """ Packs the message into a frame
 
         Escapes any special chars and applies
-        the frame marker to the beginning and end 
+        the frame marker to the beginning and end
         of the frame
 
         Args:
@@ -346,7 +347,7 @@ class HardwareController():
         Used by the HardwareController class to send commands. It packs
         the message into a struct using the given arguments. The packed
         message then gets processed by __packFrame to ensure any special
-        characters are escaped with FRAME_ESC and a beginning and end 
+        characters are escaped with FRAME_ESC and a beginning and end
         flag is added to the message.
 
         Args:
@@ -379,15 +380,15 @@ class HardwareController():
         """ Receive data from the Arduino through the serial port.
 
         Used by the HardwareController class to receive
-        messages from the Arduino. It reads single bytes from the 
+        messages from the Arduino. It reads single bytes from the
         serial port and starts processing when it finds the beginning
         of a message (FRAME_FLAG). each subsequent byte is read and checked
         for a FRAME_FLAG message or a FRAME_ESC escape flag for special
-        characters. 
+        characters.
 
-        When a full message is found it is passed to the __unpackMessage function.
-        This converts the received message to a dictionary and adds it to the 
-        recvMessageQueue.
+        When a full message is found it is passed to the __unpackMessage
+        function. This converts the received message to a dictionary and
+        adds it to the recvMessageQueue.
         """
 
         if not self.isConnected:
@@ -401,29 +402,21 @@ class HardwareController():
 
         while not foundEndOfFrame:
             recvByte = self.serialPort.read(1)
-            #print "Byte: %s" % recvByte.encode('hex')
             if foundStartOfFrame and recvByte == chr(FRAME_FLAG) and not foundEscFlag:
-                # Found ending FRAME_FLAG
                 foundEndOfFrame = True
-             #   print "found ending of a frame"
             elif recvByte == chr(FRAME_FLAG) and not foundStartOfFrame:
                 # Beginning of our message
                 foundStartOfFrame = True
-             #   print "found start of frame"
-            elif (foundStartOfFrame) and \
-                 recvByte == chr(FRAME_ESC) and not foundEscFlag:
+            elif (foundStartOfFrame) and recvByte == chr(FRAME_ESC) and not foundEscFlag:
                 # Found an escape flag which was not escaped itself
                 foundEscFlag = True
-             #   print "found an escape flag"
             elif foundStartOfFrame and foundEscFlag:
                 # Byte preceded by FLAG_ESC so treat as normal data
                 foundEscFlag = False
                 message += recvByte
-             #   print "found an escape flag before and again so treating it as part of the message"
             elif foundStartOfFrame and not foundEscFlag:
                 # regular data part of message
                 message += recvByte
-             #   print "found a normal part of the message"
 
         unpackedMessage = self.__unpackMessage(message)
         self.recvMessageQueue.put(unpackedMessage)

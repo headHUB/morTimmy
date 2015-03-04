@@ -21,7 +21,7 @@ class Robot:
         stopped = "stopped"
         autonomous = "autonomous"
 
-    # Note: only variables belonging to all 
+    # Note: only variables belonging to all
     # instances of the class belong here. Others
     # should be initialised in __init__
     MIN_DISTANCE_TO_OBJECT = 10
@@ -29,7 +29,7 @@ class Robot:
     def __init__(self):
         """ Called when the robot class is created.
 
-        It intializes the sensor data queue and sets up the 
+        It intializes the sensor data queue and sets up the
         logging output file
 
         Returns:
@@ -39,16 +39,17 @@ class Robot:
         """
 
         self.LOG_FILENAME = 'my_morTimmy.log'
+        logging.basicConfig(filename=self.LOG_FILENAME,
+                            level=logging.DEBUG,
+                            filemode='w',
+                            format='%(asctime)s %(levelname)s %(message)s')
+
         self.state = self.State()
         self.currentState = self.state.stopped
         self.arduino = HardwareController()
         self.runningTime = 0
         self.lastSensorReading = 0
 
-        logging.basicConfig(filename=self.LOG_FILENAME,
-                            level=logging.DEBUG,
-                            filemode='w',
-                            format='%(asctime)s %(levelname)s %(message)s')
         logging.info('initialising morTimmy the robot')
         self.sensorDataQueue = Queue.Queue()
         self.initialize()
@@ -62,7 +63,8 @@ class Robot:
         self.arduino.initialize()
         while not self.arduino.isConnected:
             print ("Failed to establish connection to Arduino, retrying in 5s")
-            logging.debug('Failed to establish connection to Arduino, retrying in 5s')
+            logging.debug("Failed to establish connection to Arduino, "
+                          "retrying in 5s")
             sleep(5)                # wait 5sec before trying again
             self.arduino.initialize()
         logging.info('Connected to Arduino through serial connection')
@@ -101,22 +103,22 @@ class Robot:
         while not self.arduino.recvMessageQueue.empty():
             recvMessage = self.arduino.recvMessageQueue.get_nowait()
 
-            if recvMessage == None:
+            if recvMessage is None:
                 # Why does the queue always return a None object?
-                break;
+                break
             elif recvMessage == 'Invalid':
-                logging.error('Received invalid packet, ignoring');
+                logging.error('Received invalid packet, ignoring')
             elif recvMessage['module'] == chr(MODULE_DISTANCE_SENSOR):
                 self.arduino.setDistance(recvMessage['data'])
             else:
                 logging.debug("Message with unknown module or command received. Message details:")
                 logging.debug("msgID: %d ackID: %d module: %s "
                               "commandType: %s data: %d checksum: %s" % (recvMessage['messageID'],
-                                                                          recvMessage['acknowledgeID'],
-                                                                          hex(recvMessage['module']),
-                                                                          hex(recvMessage['commandType']),
-                                                                          recvMessage['data'],
-                                                                          hex(recvMessage['checksum'])))
+                                                                         recvMessage['acknowledgeID'],
+                                                                         hex(recvMessage['module']),
+                                                                         hex(recvMessage['commandType']),
+                                                                         recvMessage['data'],
+                                                                         hex(recvMessage['checksum'])))
 
 
 def main():
