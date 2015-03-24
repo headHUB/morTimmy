@@ -63,8 +63,8 @@ class Robot:
         self.arduino.initialize()
         while not self.arduino.isConnected:
             print ("Failed to establish connection to Arduino, retrying in 5s")
-            logging.debug("Failed to establish connection to Arduino, "
-                          "retrying in 5s")
+            logging.warning("Failed to establish connection to Arduino, "
+                            "retrying in 5s")
             sleep(5)                # wait 5sec before trying again
             self.arduino.initialize()
         logging.info('Connected to Arduino through serial connection')
@@ -111,14 +111,14 @@ class Robot:
             elif recvMessage['module'] == chr(MODULE_DISTANCE_SENSOR):
                 self.arduino.setDistance(recvMessage['data'])
             else:
-                logging.debug("Message with unknown module or command received. Message details:")
-                logging.debug("msgID: %d ackID: %d module: %s "
-                              "commandType: %s data: %d checksum: %s" % (recvMessage['messageID'],
-                                                                         recvMessage['acknowledgeID'],
-                                                                         hex(recvMessage['module']),
-                                                                         hex(recvMessage['commandType']),
-                                                                         recvMessage['data'],
-                                                                         hex(recvMessage['checksum'])))
+                logging.warning("Message with unknown module or command received. Message details:")
+                logging.warning("msgID: %d ackID: %d module: %s "
+                               "commandType: %s data: %d checksum: %s" % (recvMessage['messageID'],
+                                                                          recvMessage['acknowledgeID'],
+                                                                          hex(recvMessage['module']),
+                                                                          hex(recvMessage['commandType']),
+                                                                          recvMessage['data'],
+                                                                          hex(recvMessage['checksum'])))
 
 
 def main():

@@ -1,4 +1,10 @@
-2015-03-04 15:59:45,761 INFO initialising morTimmy the robot
-2015-03-04 15:59:45,762 INFO Opening serial connection to arduino onport %s with baudrate %d
-2015-03-04 15:59:45,762 ERROR Unexpected error whilst connecting to Arduino
-2015-03-04 15:59:45,762 DEBUG Failed to establish connection to Arduino, retrying in 5s
+2015-03-24 15:03:33,488 INFO initialising morTimmy the robot
+2015-03-24 15:03:33,489 INFO Opening serial connection to arduino onport %s with baudrate %d
+2015-03-24 15:03:33,489 WARNING Could not connect to Arduino
+2015-03-24 15:03:33,489 WARNING Failed to establish connection to Arduino, retrying in 5s
+2015-03-24 15:03:38,494 INFO Opening serial connection to arduino onport %s with baudrate %d
+2015-03-24 15:03:38,495 WARNING Could not connect to Arduino
+2015-03-24 15:03:38,495 WARNING Failed to establish connection to Arduino, retrying in 5s
+2015-03-24 15:03:43,500 INFO Opening serial connection to arduino onport %s with baudrate %d
+2015-03-24 15:03:43,501 WARNING Could not connect to Arduino
+2015-03-24 15:03:43,501 WARNING Failed to establish connection to Arduino, retrying in 5s

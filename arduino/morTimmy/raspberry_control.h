@@ -63,6 +63,18 @@ namespace morTimmy {
       }
       
       /**
+        * @brief Receive and parse a message over the serial interface
+        * @param msg: a message_t structure consisting of the message data
+        */
+      void recvMessage() {
+          int numBytesAvailable = Serial.available();
+
+          while (numBytesAvailable > 0) {
+              // TODO: check if we receive start of a message and grab it until end of message is received
+          }
+      }
+
+      /**
         * @brief send a message over the serial interface
         * @param msg: a message_t structure consisting of the message data
         */

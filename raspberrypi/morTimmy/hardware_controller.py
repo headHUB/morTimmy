@@ -178,10 +178,10 @@ class HardwareController():
             self.isConnected = True
         except OSError:
             logging.error("Failed to connect to Arduino on "
-                          "serial port %s") % serialPort
+                          "serial port %s. Is the port correct?") % serialPort
             self.isConnected = False
         except Exception, e:
-            logging.error("Unexpected error whilst connecting to Arduino")
+            logging.warning("Could not connect to Arduino")
             self.isConnected = False
 
     def __del__(self):
