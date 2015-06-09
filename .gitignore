@@ -1,11 +1,11 @@
 # Ignore python .pyc library files
 *.pyc
 *.swp
+*.log
 .DS_Store
 # Ignore sphinx docstring config and makefile and my bash script for generating the docs
 generateDocs.sh         
 raspberrypi/docs/conf.py
 raspberrypi/docs/Makefile
-raspberrypi/morTimmy/my_morTimmy.log
 arduino/docs/conf.py
 arduino/docs/Makefile
