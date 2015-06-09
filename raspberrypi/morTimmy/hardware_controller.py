@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import serial			    # pyserial library for serial communications
 import struct 	         	# Python struct library for constructing the message
-import Queue
+import queue
 from zlib import crc32      # used to calculate a message checksum
 from time import sleep
 import logging
@@ -100,7 +100,7 @@ class HardwareController():
         read process
         """
 
-        self.recvMessageQueue = Queue.Queue()
+        self.recvMessageQueue = queue.Queue()
         logging.getLogger()
 
     def setDistance(self, distance):
@@ -180,7 +180,7 @@ class HardwareController():
             logging.error("Failed to connect to Arduino on "
                           "serial port %s. Is the port correct?") % serialPort
             self.isConnected = False
-        except Exception, e:
+        except Exception:
             logging.warning("Could not connect to Arduino")
             self.isConnected = False
 
@@ -280,8 +280,8 @@ class HardwareController():
                                            'checksum': recvChecksum})
             else:
                 self.recvMessageQueue.put("Invalid: Checksum failed")
-        except Exception, e:
-            self.recvMessageQueue.put("Invalid: %s" % e)
+        except Exception:
+            self.recvMessageQueue.put("error putting messg to queue")
 
     def __packFrame(self, message):
         """ Packs the message into a frame
@@ -327,7 +327,7 @@ class HardwareController():
         message = b''
 
         if(frame[:1] != chr(FRAME_FLAG)) or (frame[-1:] != chr(FRAME_FLAG)):
-            print "Invalid frame received, frame flag not valid"
+            print("Invalid frame received, frame flag not valid")
             self.recvMessageQueue.put("Invalid")
         else:
             for byte in frame:
@@ -357,7 +357,7 @@ class HardwareController():
         """
 
         if not self.isConnected:
-            print "sendMessage: Not connected to Arduino"
+            print("sendMessage: Not connected to Arduino")
             return None
 
         packedMessage = self.__packMessage(module,
@@ -392,7 +392,7 @@ class HardwareController():
         """
 
         if not self.isConnected:
-            print "recvMessage: Not connected to Arduino"
+            print("recvMessage: Not connected to Arduino")
             return None
 
         message = b''

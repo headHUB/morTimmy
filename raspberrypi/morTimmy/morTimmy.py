@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # imports
 import logging
 from hardware_controller import *
 from time import sleep, time
-import Queue
+import queue
 
 
 class Robot:
@@ -51,7 +51,7 @@ class Robot:
         self.lastSensorReading = 0
 
         logging.info('initialising morTimmy the robot')
-        self.sensorDataQueue = Queue.Queue()
+        self.sensorDataQueue = queue.Queue()
         self.initialize()
 
     def initialize(self):
@@ -88,13 +88,13 @@ class Robot:
             self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_FORWARD, 255)
             self.runningTime = currentTime
             self.currentState = self.state.running
-            print "Robot moving forward"
+            print("Robot moving forward")
         # Stop robot if running for 5sec
         elif self.currentState == self.state.running and (currentTime - self.runningTime) >= 5:
             self.arduino.sendMessage(MODULE_MOTOR, CMD_MOTOR_STOP)
             self.runningTime = currentTime
             self.currentState = self.state.stopped
-            print "Robot stopped"
+            print("Robot stopped")
 
         # Read bytes from the Arduino and add messages to the Queue if found
         self.arduino.recvMessage()
@@ -133,7 +133,7 @@ def main():
         while(True):
             morTimmy.run()
     except KeyboardInterrupt:
-        print "Thanks for running me!"
+        print("Thanks for running me!")
 
 if __name__ == '__main__':
     main()

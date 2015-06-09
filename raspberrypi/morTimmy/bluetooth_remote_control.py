@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import remote_control         # Controller driver and command classes
 import pybluez                # Bluetooth python libary

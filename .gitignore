@@ -6,5 +6,6 @@
 generateDocs.sh         
 raspberrypi/docs/conf.py
 raspberrypi/docs/Makefile
+raspberrypi/morTimmy/my_morTimmy.log
 arduino/docs/conf.py
 arduino/docs/Makefile
